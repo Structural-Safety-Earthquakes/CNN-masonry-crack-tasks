@@ -1,0 +1,31 @@
+{
+  id: example,
+  dataset_dir: example_dataset,
+
+  # Model info
+  model: Unet,
+  backbone: mobilenet,
+  use_pretrained: true,
+
+  # Learning process info
+  batch_size: 4,
+  num_epochs: 10,
+  initial_learning_rate: 0.0005,
+  regularization: 0.001,
+  dropout:,
+  optimizer: Adam,
+
+  # Dataset info
+  image_dims: [224, 224, 3],
+  validation_split_percent: 0.4,
+  binarize_labels: true,
+  augment_data: false,
+
+  # Output/logging info
+  save_model: false,
+  epochs_per_checkpoint: 5,
+
+  # Prediction settings
+  dilate_labels: true,
+  prediction_epoch:,
+}
