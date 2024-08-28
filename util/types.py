@@ -3,11 +3,17 @@ File containing many input types used for matching to avoid string matching.
 """
 from enum import StrEnum
 
+class RunMode(StrEnum):
+    """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset."""
+    TRAIN = 'train'
+    TEST = 'test'
+    BUILD = 'build'
 
 class LossType(StrEnum):
+    """Type of loss to use during training."""
     FocalLoss = 'focal_loss'
-    WCE = 'WCE'
-    BCE = 'BCE'
+    WCE = 'wce'
+    BCE = 'bce'
     F1Score = 'f1_score'
     F1ScoreDilate = 'f1_score_dilate'
 

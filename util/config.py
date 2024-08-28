@@ -5,7 +5,7 @@ from typing import Union
 import yaml
 from yaml import SafeLoader
 
-from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType
+from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType, LossType
 
 # Path constants, change at your own leisure
 DATASETS_ROOT_DIR: str = 'datasets'
@@ -21,6 +21,9 @@ OUTPUT_PREDICTIONS_DIR: str = 'predictions'
 OUTPUT_WEIGHTS_DIR: str = 'weights'
 OUTPUT_MODELS_DIR: str = 'models'
 LOG_FILE: str = 'log.csv'
+MODEL_FILE: str = 'model.json'
+METRICS_FILE: str = 'metrics.json'
+FIGURE_FILE: str = 'figure.png'
 
 @dataclass(slots=True)
 class Config:
@@ -35,7 +38,9 @@ class Config:
 
     # Learning process info
     batch_size: int
+    batch_normalization: bool
     num_epochs: int
+    loss: LossType
     initial_learning_rate: float
     regularization: Union[float, None]
     dropout: Union[float, None]
@@ -62,12 +67,18 @@ class Config:
     output_weights_dir: str # Inferred, uses id
     output_models_dir: str # Inferred, uses id
     output_log_file: str # Inferred, uses id
+    output_model_file: str # Inferred, uses id
+    output_metrics_file: str # Inferred, uses id
+    output_figure_file: str # Inferred, uses id
 
     # Prediction settings
     dilate_labels: bool
-    prediction_epoch: Union[int, None]
+    prediction_file: Union[str, None]
 
     # Run-time constants, change at your own leisure
+    START_EPOCH: int = 0
+    MONITOR_METRIC: str = 'F1_score_dil'
+
     UNET_NUM_FILTERS: int = 64
     UNET_LAYER_WEIGHT_INITIALIZERS: UnetWeightInitializerType = UnetWeightInitializerType.HENormal
 
@@ -86,7 +97,9 @@ def load_config(filename: str) -> Config:
             backbone=BackboneType(config_vals['backbone']),
             use_pretrained=bool(config_vals['use_pretrained']),
             batch_size=int(config_vals['batch_size']),
+            batch_normalization=bool(config_vals['batch_normalization']),
             num_epochs=int(config_vals['num_epochs']),
+            loss=LossType(config_vals['loss']),
             initial_learning_rate=float(config_vals['initial_learning_rate']),
             regularization=float(config_vals['regularization']),
             dropout=float(config_vals['dropout']) if config_vals.get('dropout') is not None else None,
@@ -106,6 +119,9 @@ def load_config(filename: str) -> Config:
             output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR),
             output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_MODELS_DIR),
             output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], LOG_FILE),
+            output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], MODEL_FILE),
+            output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], METRICS_FILE),
+            output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], FIGURE_FILE),
             dilate_labels=bool(config_vals['dilate_labels']),
-            prediction_epoch=int(config_vals['prediction_epoch']) if config_vals.get('prediction_epoch') is not None else None
+            prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None
         )
