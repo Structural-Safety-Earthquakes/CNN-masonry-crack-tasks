@@ -28,15 +28,20 @@ def generate_predictions(config: Config):
         'pretrained_filename': config.prediction_file,
         'save_model_weights': 'model' if config.save_model else 'weights',
         'model_json': config.output_model_file,
-        'EVAL_HDF5': config.dataset_validation_set_file,
+        'EVAL_HDF5': config.dataset_config.dataset_validation_set_file,
         'predictions_subfolder': config.output_predictions_dir + os.sep,
         'predictions_dilate': config.dilate_labels
     }
-    model = LoadModel(args, config.image_dims, config.batch_size).load_pretrained_model()
+    model = LoadModel(args, config.dataset_config.image_dims, config.batch_size).load_pretrained_model()
 
     # Do not use data augmentation when evaluating model: aug=None
-    eval_gen = HDF5DatasetGeneratorMask(config.dataset_validation_set_file, config.batch_size, aug=None, shuffle=False,
-                                        binarize=config.binarize_labels)
+    eval_gen = HDF5DatasetGeneratorMask(
+        config.dataset_config.dataset_validation_set_file,
+        config.batch_size,
+        aug=None,
+        shuffle=False,
+        binarize=config.binarize_labels
+    )
 
     # Use the pretrained model to generate predictions for the input samples from a data generator
     predictions = model.predict(

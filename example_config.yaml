@@ -1,6 +1,5 @@
 {
   id: example,
-  dataset_dir: example_dataset,
 
   # Model info
   model: Unet,
@@ -17,9 +16,6 @@
   dropout:,
   optimizer: Adam,
 
-  # Dataset info
-  image_dims: [224, 224, 3],
-  validation_split_percent: 0.4,
   binarize_labels: true,
   augment_data: false,
 

@@ -8,6 +8,7 @@ from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
+
 from util.config import Config
 from util.types import LossType
 
@@ -49,7 +50,7 @@ def train_model(config: Config):
     #
     model = Network(
         args,
-        config.image_dims,
+        config.dataset_config.image_dims,
         config.UNET_NUM_FILTERS,
         config.batch_size,
         config.initial_learning_rate,
@@ -57,14 +58,6 @@ def train_model(config: Config):
         Loss(args).define_Loss(),
         Metrics(args).define_Metrics()
     ).define_Network()
-
-    # # Visualize model
-    # try:
-    #     visualize_model(model, args['architecture'], args['summary'])
-    # except:
-    #     visualize_model_tf(model, args['architecture'], args['summary'])
-    #
-    # #%%
 
     # Data augmentation for training and validation sets
     if config.augment_data:
@@ -76,14 +69,14 @@ def train_model(config: Config):
 
     # Load data generators
     train_gen = HDF5DatasetGeneratorMask(
-        config.dataset_train_set_file,
+        config.dataset_config.dataset_train_set_file,
         config.batch_size,
         aug=aug,
         shuffle=False,
         binarize=config.binarize_labels
     )
     val_gen = HDF5DatasetGeneratorMask(
-        config.dataset_validation_set_file,
+        config.dataset_config.dataset_validation_set_file,
         config.batch_size,
         aug=aug,
         shuffle=False,
@@ -102,7 +95,7 @@ def train_model(config: Config):
         with open(config.output_model_file, 'w') as json_file:
             json_file.write(model_json)
     except:
-        'Warning: Unable to write model.json!!'
+        print('Warning: Unable to write model.json!!')
 
     # Define whether the whole model or the weights only will be saved from the ModelCheckpoint
     # Refer to the documentation of ModelCheckpoint for extra details

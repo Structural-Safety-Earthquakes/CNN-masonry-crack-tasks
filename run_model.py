@@ -1,5 +1,7 @@
 import os
 
+from util.dataset_config import load_data_config
+
 os.environ['TF_USE_LEGACY_KERAS'] = '1' # Fall back to Keras 2. We need this before loading **anything** else
 os.environ['SM_FRAMEWORK'] = 'tf.keras'
 
@@ -21,10 +23,11 @@ def run_model():
         prog='CNN-masonry-crack-tasks',
         description='Train or evaluate crack segmentation models',
     )
-    parser.add_argument('--config', '-c', help='Config file', type=str)
-    parser.add_argument('--mode', '-m', help='Train, test, build or visualize', type=RunMode)
+    parser.add_argument('--config', '-c', help='Config file', type=str, required=True)
+    parser.add_argument('--mode', '-m', help='Train, test, build or visualize', type=RunMode, required=True)
+    parser.add_argument('--dataset', '-d', help='Dataset config file', type=str, required=True)
     args = parser.parse_args()
-    config = load_config(args.config)
+    config = load_config(args.config, args.dataset)
 
     # When using DeepCrack, eager execution needs to be enabled
     if config.model == ModelType.DeepCrack:
@@ -32,7 +35,7 @@ def run_model():
 
     # Run actual program depending on mode
     if args.mode == RunMode.BUILD:
-        process_dataset(config)
+        process_dataset(config.dataset_config)
     if args.mode == RunMode.TRAIN:
         train_model(config)
     if args.mode == RunMode.TEST:

@@ -6,15 +6,10 @@ from typing import Union
 import yaml
 from yaml import SafeLoader
 
+from util.dataset_config import DatasetConfig, load_data_config
 from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType, LossType
 
 # Path constants, change at your own leisure
-DATASETS_ROOT_DIR: str = 'dataset'
-DATASETS_IMAGE_DIR: str = 'images'
-DATASETS_LABEL_DIR: str = 'labels'
-TRAIN_DATASET_FILE: str = 'train.hdf5'
-VALIDATION_DATASET_FILE: str = 'validation.hdf5'
-
 OUTPUT_ROOT_DIR: str = 'output'
 OUTPUT_CHECKPOINTS_DIR: str = 'checkpoints'
 OUTPUT_PREDICTIONS_DIR: str = 'predictions'
@@ -29,9 +24,8 @@ TXT_SUMMARY_FILE: str = 'summary.txt'
 
 @dataclass(slots=True)
 class Config:
-    """Config dataclass, holding all hyperparameters as indicated by the user as well as some defaults."""
+    """Config dataclass, holding most hyperparameters as indicated by the user as well as some defaults."""
     id: str
-    dataset_dir: str
 
     # Model info
     model: ModelType
@@ -48,17 +42,8 @@ class Config:
     dropout: Union[float, None]
     optimizer: OptimizerType
 
-    # Dataset info
-    image_dims: tuple[int, int, int]
-
-    validation_split_percent: float
-    binarize_labels: bool
     augment_data: bool
-
-    dataset_images_dir: str # Inferred, uses dataset_dir
-    dataset_labels_dir: str # Inferred, uses dataset_dir
-    dataset_train_set_file: str # Inferred, uses dataset_dir
-    dataset_validation_set_file: str # Inferred, uses dataset_dir
+    binarize_labels: bool
 
     # Output/logging info
     save_model: bool    # Whether to save the entire model (or if False, the weights)
@@ -79,6 +64,9 @@ class Config:
     dilate_labels: bool
     prediction_file: Union[str, None]   # Takes the highest trained model in case of None
 
+    # Nested configs
+    dataset_config: DatasetConfig
+
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
     MONITOR_METRIC: str = 'F1_score_dil'
@@ -90,15 +78,17 @@ class Config:
     FOCAL_LOSS_GAMMA: float = 2.0
     WCE_BETA: float = 10
 
-def load_config(filename: str) -> Config:
+def load_config(config_filename: str, dataset_config_filename) -> Config:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
-    with open(filename, 'r') as config_file:
+
+    dataset_config = load_data_config(dataset_config_filename)
+
+    with open(config_filename, 'r') as config_file:
         config_vals = yaml.load(config_file, Loader=SafeLoader)
 
     # Try loading the config
     config = Config(
         id=str(config_vals['id']),
-        dataset_dir=str(config_vals['dataset_dir']),
         model=ModelType(config_vals['model']),
         backbone=BackboneType(config_vals['backbone']),
         use_pretrained=bool(config_vals['use_pretrained']),
@@ -110,28 +100,23 @@ def load_config(filename: str) -> Config:
         regularization=float(config_vals['regularization']),
         dropout=float(config_vals['dropout']) if config_vals.get('dropout') is not None else None,
         optimizer=OptimizerType(config_vals['optimizer']),
-        image_dims=tuple(config_vals['image_dims']),
-        validation_split_percent=float(config_vals['validation_split_percent']),
-        binarize_labels=bool(config_vals['binarize_labels']),
         augment_data=bool(config_vals['augment_data']),
-        dataset_images_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_IMAGE_DIR),
-        dataset_labels_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_LABEL_DIR),
-        dataset_train_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], TRAIN_DATASET_FILE),
-        dataset_validation_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], VALIDATION_DATASET_FILE),
+        binarize_labels=bool(config_vals['binarize_labels']),
         save_model=bool(config_vals['save_model']),
         epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
-        output_checkpoints_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_CHECKPOINTS_DIR),
-        output_predictions_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_PREDICTIONS_DIR),
-        output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR),
-        output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_MODELS_DIR),
-        output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], LOG_FILE),
-        output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], MODEL_FILE),
-        output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], METRICS_FILE),
-        output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], FIGURE_FILE),
+        output_checkpoints_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_CHECKPOINTS_DIR),
+        output_predictions_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_PREDICTIONS_DIR),
+        output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_WEIGHTS_DIR),
+        output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_MODELS_DIR),
+        output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, LOG_FILE),
+        output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, MODEL_FILE),
+        output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, METRICS_FILE),
+        output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, FIGURE_FILE),
         output_network_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], NETWORK_FIGURE_FILE),
         output_txt_summary_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], TXT_SUMMARY_FILE),
         dilate_labels=bool(config_vals['dilate_labels']),
-        prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None
+        prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None,
+        dataset_config=dataset_config
     )
 
     # Create dirs that don't exist

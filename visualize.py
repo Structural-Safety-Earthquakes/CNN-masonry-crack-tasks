@@ -48,7 +48,7 @@ def visualize_architecture(config: Config):
     #
     model = Network(
         args,
-        config.image_dims,
+        config.dataset_config.image_dims,
         config.UNET_NUM_FILTERS,
         config.batch_size,
         config.initial_learning_rate,

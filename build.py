@@ -6,10 +6,9 @@ from skimage.transform import resize
 from sklearn.model_selection import train_test_split
 
 from subroutines.HDF5 import HDF5DatasetWriterMask
-from util.config import Config
+from util.dataset_config import DatasetConfig
 
-
-def process_dataset(config: Config):
+def process_dataset(config: DatasetConfig):
     """Process the dataset into a training and validation set."""
 
     # Grab the paths to the images and masks and sort them to ensure everything is properly in order.
@@ -36,7 +35,6 @@ def process_dataset(config: Config):
             (list(zip(train_img_split, train_label_split)), config.dataset_train_set_file),
             (list(zip(val_img_split, val_label_split)), config.dataset_validation_set_file)
         ]
-
 
     # Loop over the dataset tuples
     for (data_pairs, output_file) in datasets:
