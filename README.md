@@ -9,15 +9,37 @@ easier to train multiple networks at the same time.
 * Remove unnecessary conventions like dataset folder naming.
 * Dependency cleanup: clearly indicate all dependencies through a `requirements.txt` file and separate the plotting and evalution of gathered data into a separate module, which is optional to use.
 
-The core functionality of the original repository is retained, meaning that when using the same parameters, the same results as the original repository are obtained.
+The core functionality of the original repository is retained, meaning that when using the same parameters, the same results as the original repository are obtained. For changes compared to the original repo, please have a look at the [PR descriptions](https://github.com/DavidHidde/CNN-masonry-crack-tasks/pulls?q=is%3Apr+is%3Aclosed+).
 
 ## Installation
 
-WIP
+The project makes use of multiple dependencies. To install these, simply run `pip3 install -r requirements.txt`.  
+
+Like the original repo, some files must currently be copied over from other repos in order for some configurations to work:
+>   In order to use the Deeplabv3 network copy model.py to the networks folder.  
+    In order to use the DeepCrack network copy edeepcrack_cls.py and indices_pooling.py to the networks folder.
+
 
 ## Usage
 
-WIP
+The basic entrypoint of the program is `run_model.py`:
+
+```bash
+python3 run_model.py --config CONFIG --dataset DATASET --mode MODE
+```
+
+where `CONFIG` and `DATASET` should point to config YAML files (see [`example_config.yaml`](example_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)) and `MODE` should indicate the type of run mode. The run mode consist of:
+
+* `build`: Build and process the dataset into a training and validation set.
+* `train`: Train a network.
+* `test`: Generate predictions.
+* `visualize`: Visualize the model architecture in a file.
+
+### Configuration file
+
+Examples: [`example_config.yaml`](example_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)  
+
+Note that many of the configurations options are either strings, numbers or booleans. These speak for themselves. For some settings, only a set of values are possible. These values are listed in [`types.py`](util/types.py). An overview of all settings and their types is provided in [`config.py`](util/config.py).
 
 # Acknowledgements - original work
 
