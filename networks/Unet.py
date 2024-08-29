@@ -45,16 +45,9 @@ Unet is based on the implementation found in the link below:
 https://www.depends-on-the-definition.com/unet-keras-segmenting-images/
 """
 
-from keras.models import Model
-from keras.layers import Input
-from keras.layers import BatchNormalization
-from keras.layers import Activation
-from keras.layers import Dropout
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import Conv2DTranspose
-from keras.layers.pooling import MaxPooling2D
-from keras.layers.merge import concatenate
-from keras.regularizers import l2
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, BatchNormalization, Activation, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, concatenate
+from tensorflow.keras.regularizers import l2
 
 def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True, regularization=None, kernel_initializer="he_normal"):
     # first layer

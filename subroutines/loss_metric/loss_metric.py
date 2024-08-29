@@ -42,7 +42,7 @@ Your feedback is welcome. Feel free to reach out to explore any options for coll
 
 #%%
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -62,7 +62,7 @@ def dilation2d(img4D):
     
     with tf.compat.v1.variable_scope('dilation2d'):
         kernel = tf.zeros((kernel_size, kernel_size, 1)) 
-        output4D = tf.nn.dilation2d(img4D, filter=kernel, strides=(1,1,1,1), rates=(1,1,1,1), padding="SAME")
+        output4D = tf.nn.dilation2d(img4D, kernel, (1,1,1,1), 'SAME', 'NHWC', (1,1,1,1))
 
         return output4D
 

@@ -183,5 +183,11 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 .idea
+.DS_Store
+
 output/*
 !output/.gitkeep
+
+dataset/*
+!dataset/example_dataset
+dataset/example_dataset/*.hdf5

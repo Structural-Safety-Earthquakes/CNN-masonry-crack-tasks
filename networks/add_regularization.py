@@ -40,11 +40,10 @@ YouTube Channel: https://www.youtube.com/channel/UCuSdAarhISVQzV2GhxaErsg
 Your feedback is welcome. Feel free to reach out to explore any options for collaboration.
 """
 
-import keras
-from keras.regularizers import l2
+from tensorflow.keras.regularizers import l2, Regularizer
 import os
 import tempfile
-from keras.models import model_from_json
+from tensorflow.keras.models import model_from_json
 
 def add_regularization(model, regularization):
     """
@@ -54,7 +53,7 @@ def add_regularization(model, regularization):
 
     regularizer = l2(regularization)
 
-    if not isinstance(regularizer, keras.regularizers.Regularizer):
+    if not isinstance(regularizer, Regularizer):
         print("Regularizer must be a subclass of tf.keras.regularizers.Regularizer")
         return model
 

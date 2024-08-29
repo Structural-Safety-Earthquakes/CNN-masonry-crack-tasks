@@ -97,7 +97,7 @@ class Network:
                    
             elif model_to_use == 'Unet':
                 model = sm.Unet(BACKBONE, input_shape=self.IMAGE_DIMS, classes=n_classes, activation=activation, encoder_weights=encoder_weights,
-                                decoder_filters=(1024, 512, 256, 128, 64), dropout = self.args['dropout'])
+                                decoder_filters=(1024, 512, 256, 128, 64))
                 
             # If requested, add regularization and then return the model
             model = self.add_regularization_function(self.args, model)

@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Union
 
 import yaml
@@ -8,8 +9,7 @@ from yaml import SafeLoader
 from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType, LossType
 
 # Path constants, change at your own leisure
-DATASETS_ROOT_DIR: str = 'datasets'
-DATASETS_PROCESSED_DIR: str = 'processed'
+DATASETS_ROOT_DIR: str = 'dataset'
 DATASETS_IMAGE_DIR: str = 'images'
 DATASETS_LABEL_DIR: str = 'labels'
 TRAIN_DATASET_FILE: str = 'train.hdf5'
@@ -24,6 +24,8 @@ LOG_FILE: str = 'log.csv'
 MODEL_FILE: str = 'model.json'
 METRICS_FILE: str = 'metrics.json'
 FIGURE_FILE: str = 'figure.png'
+NETWORK_FIGURE_FILE: str = 'network.png'
+TXT_SUMMARY_FILE: str = 'summary.txt'
 
 @dataclass(slots=True)
 class Config:
@@ -70,10 +72,12 @@ class Config:
     output_model_file: str # Inferred, uses id
     output_metrics_file: str # Inferred, uses id
     output_figure_file: str # Inferred, uses id
+    output_network_figure_file: str # Inferred, uses id
+    output_txt_summary_file: str  # Inferred, uses id
 
     # Prediction settings
     dilate_labels: bool
-    prediction_file: Union[str, None]
+    prediction_file: Union[str, None]   # Takes the highest trained model in case of None
 
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
@@ -90,38 +94,50 @@ def load_config(filename: str) -> Config:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
     with open(filename, 'r') as config_file:
         config_vals = yaml.load(config_file, Loader=SafeLoader)
-        return Config(
-            id=str(config_vals['id']),
-            dataset_dir=str(config_vals['dataset_dir']),
-            model=ModelType(config_vals['model']),
-            backbone=BackboneType(config_vals['backbone']),
-            use_pretrained=bool(config_vals['use_pretrained']),
-            batch_size=int(config_vals['batch_size']),
-            batch_normalization=bool(config_vals['batch_normalization']),
-            num_epochs=int(config_vals['num_epochs']),
-            loss=LossType(config_vals['loss']),
-            initial_learning_rate=float(config_vals['initial_learning_rate']),
-            regularization=float(config_vals['regularization']),
-            dropout=float(config_vals['dropout']) if config_vals.get('dropout') is not None else None,
-            optimizer=OptimizerType(config_vals['optimizer']),
-            image_dims=tuple(config_vals['image_dims']),
-            validation_split_percent=float(config_vals['validation_split_percent']),
-            binarize_labels=bool(config_vals['binarize_labels']),
-            augment_data=bool(config_vals['augment_data']),
-            dataset_images_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_IMAGE_DIR),
-            dataset_labels_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_LABEL_DIR),
-            dataset_train_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], TRAIN_DATASET_FILE),
-            dataset_validation_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], VALIDATION_DATASET_FILE),
-            save_model=bool(config_vals['save_model']),
-            epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
-            output_checkpoints_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_CHECKPOINTS_DIR),
-            output_predictions_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_PREDICTIONS_DIR),
-            output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR),
-            output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_MODELS_DIR),
-            output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], LOG_FILE),
-            output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], MODEL_FILE),
-            output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], METRICS_FILE),
-            output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], FIGURE_FILE),
-            dilate_labels=bool(config_vals['dilate_labels']),
-            prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None
-        )
+
+    # Try loading the config
+    config = Config(
+        id=str(config_vals['id']),
+        dataset_dir=str(config_vals['dataset_dir']),
+        model=ModelType(config_vals['model']),
+        backbone=BackboneType(config_vals['backbone']),
+        use_pretrained=bool(config_vals['use_pretrained']),
+        batch_size=int(config_vals['batch_size']),
+        batch_normalization=bool(config_vals['batch_normalization']),
+        num_epochs=int(config_vals['num_epochs']),
+        loss=LossType(config_vals['loss']),
+        initial_learning_rate=float(config_vals['initial_learning_rate']),
+        regularization=float(config_vals['regularization']),
+        dropout=float(config_vals['dropout']) if config_vals.get('dropout') is not None else None,
+        optimizer=OptimizerType(config_vals['optimizer']),
+        image_dims=tuple(config_vals['image_dims']),
+        validation_split_percent=float(config_vals['validation_split_percent']),
+        binarize_labels=bool(config_vals['binarize_labels']),
+        augment_data=bool(config_vals['augment_data']),
+        dataset_images_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_IMAGE_DIR),
+        dataset_labels_dir=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], DATASETS_LABEL_DIR),
+        dataset_train_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], TRAIN_DATASET_FILE),
+        dataset_validation_set_file=os.path.join(DATASETS_ROOT_DIR, config_vals['dataset_dir'], VALIDATION_DATASET_FILE),
+        save_model=bool(config_vals['save_model']),
+        epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
+        output_checkpoints_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_CHECKPOINTS_DIR),
+        output_predictions_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_PREDICTIONS_DIR),
+        output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR),
+        output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_MODELS_DIR),
+        output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], LOG_FILE),
+        output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], MODEL_FILE),
+        output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], METRICS_FILE),
+        output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], FIGURE_FILE),
+        output_network_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], NETWORK_FIGURE_FILE),
+        output_txt_summary_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], TXT_SUMMARY_FILE),
+        dilate_labels=bool(config_vals['dilate_labels']),
+        prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None
+    )
+
+    # Create dirs that don't exist
+    Path(config.output_checkpoints_dir).mkdir(parents=True, exist_ok=True)
+    Path(config.output_predictions_dir).mkdir(parents=True, exist_ok=True)
+    Path(config.output_weights_dir).mkdir(parents=True, exist_ok=True)
+    Path(config.output_models_dir).mkdir(parents=True, exist_ok=True)
+
+    return config

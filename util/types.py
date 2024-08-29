@@ -4,10 +4,11 @@ File containing many input types used for matching to avoid string matching.
 from enum import StrEnum
 
 class RunMode(StrEnum):
-    """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset."""
+    """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset, visualize visualizes the architecture."""
     TRAIN = 'train'
     TEST = 'test'
     BUILD = 'build'
+    VISUALIZE = 'visualize'
 
 class LossType(StrEnum):
     """Type of loss to use during training."""

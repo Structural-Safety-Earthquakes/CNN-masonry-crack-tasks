@@ -29,8 +29,8 @@ def process_dataset(config: Config):
     # Construct a list pairing the training, validation, and testing image paths along with their corresponding labels
     # and output HDF5 files
     datasets = [
-        (zip(train_img_split, train_label_split), config.dataset_train_set_file),
-        (zip(val_img_split, val_label_split), config.dataset_validation_set_file)
+        (list(zip(train_img_split, train_label_split)), config.dataset_train_set_file),
+        (list(zip(val_img_split, val_label_split)), config.dataset_validation_set_file)
     ]
 
     # Loop over the dataset tuples
@@ -38,7 +38,7 @@ def process_dataset(config: Config):
         print("[INFO] building {}...".format(output_file))
 
         # Create HDF5 writer
-        writer = HDF5DatasetWriterMask([len(data_pairs), *config.image_dims], output_file)
+        writer = HDF5DatasetWriterMask((len(data_pairs), *config.image_dims), output_file)
 
         # initialize the progress bar
         widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]

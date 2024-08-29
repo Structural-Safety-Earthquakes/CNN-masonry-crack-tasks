@@ -9,14 +9,28 @@ from util.config import Config
 
 def generate_predictions(config: Config):
     """Generate the predictions given a specific configuration."""
+
+    if config.prediction_file is None:
+        candidates = [weight for weight in os.listdir(config.output_weights_dir) if weight.endswith('.h5')] + [model for model in os.listdir(config.output_models_dir) if model.endswith('.h5')]
+        best_value = '0000000000000'
+        for candidate in candidates:
+            if candidate[-6:-3] > best_value[-6:-3]:
+                best_value = candidate
+
+        config.prediction_file = best_value if best_value != '0000000000000' else None
+        print(config.prediction_file)
+
     # TODO: remove args by refactoring dependencies
     args = {
         'main': os.getcwd(),
         'model': config.model.value,
-        'weights': config.output_weights_dir,
+        'weights': config.output_weights_dir + os.sep,
         'pretrained_filename': config.prediction_file,
         'save_model_weights': 'model' if config.save_model else 'weights',
-        'model_json': config.output_model_file
+        'model_json': config.output_model_file,
+        'EVAL_HDF5': config.dataset_validation_set_file,
+        'predictions_subfolder': config.output_predictions_dir + os.sep,
+        'predictions_dilate': config.dilate_labels
     }
     model = LoadModel(args, config.image_dims, config.batch_size).load_pretrained_model()
 
@@ -25,7 +39,7 @@ def generate_predictions(config: Config):
                                         binarize=config.binarize_labels)
 
     # Use the pretrained model to generate predictions for the input samples from a data generator
-    predictions = model.predict_generator(
+    predictions = model.predict(
         eval_gen.generator(),
         steps=eval_gen.numImages // config.batch_size + 1,
         max_queue_size=config.batch_size * 2,

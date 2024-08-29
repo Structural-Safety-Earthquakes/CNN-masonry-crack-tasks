@@ -6,7 +6,6 @@ from network_class import Network
 from optimizer_class import Optimizer
 from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
-from subroutines.visualize_model import visualize_model, visualize_model_tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from util.config import Config
@@ -59,13 +58,13 @@ def train_model(config: Config):
         Metrics(args).define_Metrics()
     ).define_Network()
 
-    # Visualize model
-    try:
-        visualize_model(model, args['architecture'], args['summary'])
-    except:
-        visualize_model_tf(model, args['architecture'], args['summary'])
-
-    #%%
+    # # Visualize model
+    # try:
+    #     visualize_model(model, args['architecture'], args['summary'])
+    # except:
+    #     visualize_model_tf(model, args['architecture'], args['summary'])
+    #
+    # #%%
 
     # Data augmentation for training and validation sets
     if config.augment_data:
@@ -114,7 +113,7 @@ def train_model(config: Config):
     epoch_checkpoint = EpochCheckpoint(
         config.output_checkpoints_dir,
         config.output_weights_dir,
-        not config.save_model,
+        'model' if config.save_model else 'weights',
         every=config.epochs_per_checkpoint,
         startAt=config.START_EPOCH,
         info=config.id,
@@ -138,7 +137,7 @@ def train_model(config: Config):
     #%%
     # Train the network
     #
-    H = model.fit_generator(
+    H = model.fit(
         train_gen.generator(),
         steps_per_epoch=train_gen.numImages // config.batch_size,
         validation_data=val_gen.generator(),
