@@ -18,20 +18,25 @@ def process_dataset(config: Config):
     img_paths.sort()
     label_paths.sort()
 
-    # Perform stratified sampling from the training set to build the testing split from the training data
-    train_img_split, val_img_split, train_label_split, val_label_split = train_test_split(
-        img_paths,
-        label_paths,
-        test_size=config.validation_split_percent,
-        random_state=42
-    )
+    if config.validation_split_percent == 0.:   # Only training data
+        datasets = [(list(zip(img_paths, label_paths)), config.dataset_train_set_file)]
+    elif config.validation_split_percent == 1.: # Only validation data
+        datasets = [(list(zip(img_paths, label_paths)), config.dataset_validation_set_file)]
+    else:   # Perform stratified sampling from the training set to build the testing split from the training data
+        train_img_split, val_img_split, train_label_split, val_label_split = train_test_split(
+            img_paths,
+            label_paths,
+            test_size=config.validation_split_percent,
+            random_state=42
+        )
 
-    # Construct a list pairing the training, validation, and testing image paths along with their corresponding labels
-    # and output HDF5 files
-    datasets = [
-        (list(zip(train_img_split, train_label_split)), config.dataset_train_set_file),
-        (list(zip(val_img_split, val_label_split)), config.dataset_validation_set_file)
-    ]
+        # Construct a list pairing the training, validation, and testing image paths along with their corresponding labels
+        # and output HDF5 files
+        datasets = [
+            (list(zip(train_img_split, train_label_split)), config.dataset_train_set_file),
+            (list(zip(val_img_split, val_label_split)), config.dataset_validation_set_file)
+        ]
+
 
     # Loop over the dataset tuples
     for (data_pairs, output_file) in datasets:
