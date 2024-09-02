@@ -41,7 +41,7 @@ Your feedback is welcome. Feel free to reach out to explore any options for coll
 """
 
 import sys
-import keras
+import tensorflow as tf
 
 class Metrics:
     def __init__(self, args):
@@ -59,7 +59,7 @@ class Metrics:
 
         # Prepare metrics
         metrics = [
-                keras.metrics.BinaryAccuracy(name='accuracy'),
+                tf.keras.metrics.BinaryAccuracy(name='accuracy'),
                 Recall,
                 Precision,
                 Precision_dil,

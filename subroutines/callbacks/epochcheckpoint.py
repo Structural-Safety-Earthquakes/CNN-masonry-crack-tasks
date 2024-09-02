@@ -53,7 +53,7 @@ Adrian Rosebrock, Keras: Starting, stopping, and resuming training,
 """
 
 # import the necessary packages
-from keras.callbacks import Callback
+from tensorflow.keras.callbacks import Callback
 import os
 
 class EpochCheckpoint(Callback):
