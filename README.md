@@ -3,11 +3,10 @@
 This is a fork of the [crack_detection_CNN_masonry repoistory](https://github.com/dimitrisdais/crack_detection_CNN_masonry), which aims to share the code of their research about crack detection/segmentation on masonry surfaces. This fork improves upon the original code through the following:
 
 * Provide a clearer, well-documented codebase which is easier to interpret and use.
-* Separation of the input parameters into configuration files, making it significantly easier to run
-easier to train multiple networks at the same time.
-* Pipeline automation, no more separate building of the dataset! Simply run the code in either evaluation or training mode through CLI arguments.
-* Remove unnecessary conventions like dataset folder naming.
-* Dependency cleanup: clearly indicate all dependencies through a `requirements.txt` file and separate the plotting and evalution of gathered data into a separate module, which is optional to use.
+* Separation of the input parameters into configuration files, making it significantly easier to run, train and test multiple networks at the same time.
+* Remove weird and unnecessary conventions like folder naming.
+* Add better generalizability through the use of configuration files and enhanced dataset support. Add support for more segmentation models.
+* Dependency cleanup: clearly indicate all dependencies through a `requirements.txt` file and make the framework compatible with modern Tensorflow.
 
 The core functionality of the original repository is retained, meaning that when using the same parameters, the same results as the original repository are obtained. For changes compared to the original repo, please have a look at the [PR descriptions](https://github.com/DavidHidde/CNN-masonry-crack-tasks/pulls?q=is%3Apr+is%3Aclosed+).
 
