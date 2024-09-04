@@ -14,9 +14,10 @@ The core functionality of the original repository is retained, meaning that when
 
 The project makes use of multiple dependencies. To install these, simply run `pip3 install -r requirements.txt`.  
 
-Like the original repo, some files must currently be copied over from other repos in order for some configurations to work:
->   In order to use the Deeplabv3 network copy model.py to the networks folder.  
-    In order to use the DeepCrack network copy edeepcrack_cls.py and indices_pooling.py to the networks folder.
+Like the original repo, some files must currently be copied over from other repos in order for some configurations to work. This repo solves it through Git submodules:
+```bash
+git submodule init --recursive
+```
 
 
 ## Usage

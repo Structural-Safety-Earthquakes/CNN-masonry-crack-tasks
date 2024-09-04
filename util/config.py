@@ -58,11 +58,11 @@ class Config:
     output_metrics_file: str # Inferred, uses id
     output_figure_file: str # Inferred, uses id
     output_network_figure_file: str # Inferred, uses id
-    output_txt_summary_file: str  # Inferred, uses id
+    output_txt_summary_file: str # Inferred, uses id
 
     # Prediction settings
     dilate_labels: bool
-    prediction_file: Union[str, None]   # Takes the highest trained model in case of None
+    weights_file: Union[str, None] # Takes the highest trained model in case of None
 
     # Nested configs
     dataset_config: DatasetConfig
@@ -115,7 +115,7 @@ def load_config(config_filename: str, dataset_config_filename) -> Config:
         output_network_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], NETWORK_FIGURE_FILE),
         output_txt_summary_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], TXT_SUMMARY_FILE),
         dilate_labels=bool(config_vals['dilate_labels']),
-        prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None,
+        weights_file=config_vals['weights_file'] if config_vals.get('weights_file') is not None else None,
         dataset_config=dataset_config
     )
 

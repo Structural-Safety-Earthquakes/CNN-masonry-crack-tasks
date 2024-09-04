@@ -1,4 +1,3 @@
-from argparse import ArgumentError
 from typing import Callable
 
 import tensorflow as tf
@@ -22,4 +21,4 @@ def determine_loss_function(config: Config) -> Callable[[tf.Tensor, tf.Tensor], 
         case LossType.F1ScoreDilate:
             return f1_score_loss(True)
         case _:
-            raise ArgumentError(f'Unknown loss type: {config.loss}')
+            raise ValueError(f'Unknown loss type: {config.loss}')

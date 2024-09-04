@@ -1,5 +1,4 @@
 import platform
-from argparse import ArgumentError
 
 from tensorflow.keras.optimizers.legacy import Adam as LegacyAdam
 from tensorflow.keras.optimizers import Adam, SGD, RMSprop
@@ -20,4 +19,4 @@ def determine_optimizer(config: Config) -> optimizer.Optimizer:
         case OptimizerType.RMSprop:
             return RMSprop(config.initial_learning_rate)
         case _:
-            raise ArgumentError(f'Unknown loss type: {config.loss}')
+            raise ValueError(f'Unknown loss type: {config.loss}')
