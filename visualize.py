@@ -4,8 +4,8 @@ from tensorflow.keras.utils import plot_model
 
 from network.loss import determine_loss_function
 from network.metrics import get_standard_metrics
+from network.optimizer import determine_optimizer
 from network_class import Network
-from optimizer_class import Optimizer
 from util.config import Config
 from contextlib import redirect_stdout
 
@@ -33,7 +33,7 @@ def visualize_architecture(config: Config):
         config.UNET_NUM_FILTERS,
         config.batch_size,
         config.initial_learning_rate,
-        Optimizer(args, config.initial_learning_rate).define_Optimizer(),
+        determine_optimizer(config),
         determine_loss_function(config),
         get_standard_metrics()
     ).define_Network()
