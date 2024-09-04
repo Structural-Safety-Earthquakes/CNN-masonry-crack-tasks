@@ -69,7 +69,7 @@ class Config:
 
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
-    MONITOR_METRIC: str = 'F1_score_dil'
+    MONITOR_METRIC: str = 'f1_score_dilated'
 
     UNET_NUM_FILTERS: int = 64
     UNET_LAYER_WEIGHT_INITIALIZERS: UnetWeightInitializerType = UnetWeightInitializerType.HENormal

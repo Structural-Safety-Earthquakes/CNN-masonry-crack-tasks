@@ -2,38 +2,19 @@ import os
 
 from tensorflow.keras.utils import plot_model
 
-from loss_class import Loss
-from metrics_class import Metrics
+from network.loss import determine_loss_function
+from network.metrics import get_standard_metrics
 from network_class import Network
 from optimizer_class import Optimizer
 from util.config import Config
 from contextlib import redirect_stdout
 
-from util.types import LossType
-
 
 def visualize_architecture(config: Config):
     """Create plots of the network architecture."""
     # TODO: remove args by refactoring dependencies
-    match config.loss:
-        case LossType.FocalLoss:
-            loss_str = 'Focal_Loss'
-        case LossType.WCE:
-            loss_str = 'WCE'
-        case LossType.BCE:
-            loss_str = 'Binary_Crossentropy'
-        case LossType.F1Score:
-            loss_str = 'F1_score_Loss'
-        case LossType.F1ScoreDilate:
-            loss_str = 'F1_score_Loss_dill'
-        case _:
-            loss_str = 'WCE'
     args = {
         'main': os.getcwd(),
-        'loss': loss_str,
-        'focal_loss_a': config.FOCAL_LOSS_ALPHA,
-        'focal_loss_g': config.FOCAL_LOSS_GAMMA,
-        'WCE_beta': config.WCE_BETA,
         'opt': config.optimizer.value,
         'regularization': config.regularization,
         'model': f'sm_{config.model.value}_{config.backbone.value}' if config.backbone is not None else config.model.value,
@@ -53,8 +34,8 @@ def visualize_architecture(config: Config):
         config.batch_size,
         config.initial_learning_rate,
         Optimizer(args, config.initial_learning_rate).define_Optimizer(),
-        Loss(args).define_Loss(),
-        Metrics(args).define_Metrics()
+        determine_loss_function(config),
+        get_standard_metrics()
     ).define_Network()
 
     # Create a visual plot

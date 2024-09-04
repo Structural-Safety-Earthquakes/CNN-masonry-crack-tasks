@@ -18,7 +18,7 @@ def generate_predictions(config: Config):
                 best_value = candidate
 
         config.prediction_file = best_value if best_value != '0000000000000' else None
-        print(config.prediction_file)
+        print(f'Using {config.prediction_file} for predictions.')
 
     # TODO: remove args by refactoring dependencies
     args = {
