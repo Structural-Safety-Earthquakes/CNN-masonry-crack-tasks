@@ -102,7 +102,7 @@ def build_model(config: Config) -> tf.keras.Model:
         case _:
             raise ValueError(f'Unknown model type: {config.model}')
 
-    # if config.regularization:
-    #     model = add_regularization(model, config.regularization)
+    if config.regularization:
+        model = add_regularization(model, config.regularization)
 
     return model
