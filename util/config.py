@@ -7,7 +7,7 @@ import yaml
 from yaml import SafeLoader
 
 from util.dataset_config import DatasetConfig, load_data_config
-from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType, LossType
+from util.types import OptimizerType, ModelType, BackboneType, LossType
 
 # Path constants, change at your own leisure
 OUTPUT_ROOT_DIR: str = 'output'
@@ -29,7 +29,7 @@ class Config:
 
     # Model info
     model: ModelType
-    backbone: BackboneType
+    backbone: Union[BackboneType, None]
     use_pretrained: bool
 
     # Learning process info
@@ -58,25 +58,18 @@ class Config:
     output_metrics_file: str # Inferred, uses id
     output_figure_file: str # Inferred, uses id
     output_network_figure_file: str # Inferred, uses id
-    output_txt_summary_file: str  # Inferred, uses id
+    output_txt_summary_file: str # Inferred, uses id
 
     # Prediction settings
     dilate_labels: bool
-    prediction_file: Union[str, None]   # Takes the highest trained model in case of None
+    weights_file: Union[str, None] # Takes the highest trained model in case of None
 
     # Nested configs
     dataset_config: DatasetConfig
 
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
-    MONITOR_METRIC: str = 'F1_score_dil'
-
-    UNET_NUM_FILTERS: int = 64
-    UNET_LAYER_WEIGHT_INITIALIZERS: UnetWeightInitializerType = UnetWeightInitializerType.HENormal
-
-    FOCAL_LOSS_ALPHA: float = 0.25
-    FOCAL_LOSS_GAMMA: float = 2.0
-    WCE_BETA: float = 10
+    MONITOR_METRIC: str = 'f1_score_dilated'
 
 def load_config(config_filename: str, dataset_config_filename) -> Config:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
@@ -90,7 +83,7 @@ def load_config(config_filename: str, dataset_config_filename) -> Config:
     config = Config(
         id=str(config_vals['id']),
         model=ModelType(config_vals['model']),
-        backbone=BackboneType(config_vals['backbone']),
+        backbone=BackboneType(config_vals['backbone']) if config_vals.get('backbone') else None,
         use_pretrained=bool(config_vals['use_pretrained']),
         batch_size=int(config_vals['batch_size']),
         batch_normalization=bool(config_vals['batch_normalization']),
@@ -115,7 +108,7 @@ def load_config(config_filename: str, dataset_config_filename) -> Config:
         output_network_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], NETWORK_FIGURE_FILE),
         output_txt_summary_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], TXT_SUMMARY_FILE),
         dilate_labels=bool(config_vals['dilate_labels']),
-        prediction_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], OUTPUT_WEIGHTS_DIR, config_vals['prediction_file']) if config_vals.get('prediction_file') is not None else None,
+        weights_file=config_vals['weights_file'] if config_vals.get('weights_file') is not None else None,
         dataset_config=dataset_config
     )
 

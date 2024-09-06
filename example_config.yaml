@@ -25,5 +25,5 @@
 
   # Prediction settings
   dilate_labels: true,
-  prediction_file:,
+  weights_file:,
 }

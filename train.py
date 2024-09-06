@@ -1,63 +1,29 @@
 import os
 
-from loss_class import Loss
-from metrics_class import Metrics
-from network_class import Network
-from optimizer_class import Optimizer
+from network.loss import determine_loss_function
+from network.metrics import get_standard_metrics
+from network.model import build_model
+from network.optimizer import determine_optimizer
 from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 
 from util.config import Config
-from util.types import LossType
 
 
 def train_model(config: Config):
     """Train a model given the specific config."""
 
-    # TODO: remove args by refactoring dependencies
-    match config.loss:
-        case LossType.FocalLoss:
-            loss_str = 'Focal_Loss'
-        case LossType.WCE:
-            loss_str = 'WCE'
-        case LossType.BCE:
-            loss_str = 'Binary_Crossentropy'
-        case LossType.F1Score:
-            loss_str = 'F1_score_Loss'
-        case LossType.F1ScoreDilate:
-            loss_str = 'F1_score_Loss_dill'
-        case _:
-            loss_str = 'WCE'
-    args = {
-        'main': os.getcwd(),
-        'loss': loss_str,
-        'focal_loss_a': config.FOCAL_LOSS_ALPHA,
-        'focal_loss_g': config.FOCAL_LOSS_GAMMA,
-        'WCE_beta': config.WCE_BETA,
-        'opt': config.optimizer.value,
-        'regularization': config.regularization,
-        'model': f'sm_{config.model.value}_{config.backbone.value}' if config.backbone is not None else config.model.value,
-        'dropout': config.dropout,
-        'batchnorm': config.batch_normalization,
-        'init': config.UNET_LAYER_WEIGHT_INITIALIZERS.value,
-        'encoder_weights': 'imagenet' if config.use_pretrained else None
-    }
-
     #%%
     # Prepare model for training
     #
-    model = Network(
-        args,
-        config.dataset_config.image_dims,
-        config.UNET_NUM_FILTERS,
-        config.batch_size,
-        config.initial_learning_rate,
-        Optimizer(args, config.initial_learning_rate).define_Optimizer(),
-        Loss(args).define_Loss(),
-        Metrics(args).define_Metrics()
-    ).define_Network()
+    model = build_model(config)
+    model.compile(
+        optimizer=determine_optimizer(config),
+        loss=determine_loss_function(config),
+        metrics=[get_standard_metrics()]
+    )
 
     # Data augmentation for training and validation sets
     if config.augment_data:

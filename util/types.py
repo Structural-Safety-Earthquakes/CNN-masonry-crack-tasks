@@ -1,30 +1,30 @@
 """
 File containing many input types used for matching to avoid string matching.
 """
-from enum import StrEnum
+from enum import Enum
 
-class RunMode(StrEnum):
+class RunMode(Enum):
     """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset, visualize visualizes the architecture."""
     TRAIN = 'train'
     TEST = 'test'
     BUILD = 'build'
     VISUALIZE = 'visualize'
 
-class LossType(StrEnum):
+class LossType(Enum):
     """Type of loss to use during training."""
     FocalLoss = 'focal_loss'
     WCE = 'wce'
     BCE = 'bce'
     F1Score = 'f1_score'
-    F1ScoreDilate = 'f1_score_dilate'
+    F1ScoreDilate = 'f1_score_dilated'
 
-class OptimizerType(StrEnum):
+class OptimizerType(Enum):
     """Types of optimization algorithms."""
     Adam = 'Adam'
     SGD = 'SGD'
     RMSprop = 'RMSprop'
 
-class ModelType(StrEnum):
+class ModelType(Enum):
     """Types of models used for the network. Some models can utilize backbones."""
     DeepLabV3 = 'DeepLabV3'
     DeepCrack = 'DeepCrack'
@@ -35,7 +35,7 @@ class ModelType(StrEnum):
     FPN = 'FPN'
     LinkNet = 'LinkNet'
 
-class BackboneType(StrEnum):
+class BackboneType(Enum):
     """
     Types of backbone models.
     (see https://github.com/qubvel/segmentation_models#models-and-backbones)
@@ -72,9 +72,3 @@ class BackboneType(StrEnum):
     EfficientNetB5 = 'efficientnetb5'
     EfficientNetB6 = 'efficientnetb6'
     EfficientNetB7 = 'efficientnetb7'
-
-class UnetWeightInitializerType(StrEnum):
-    """Type of weight intializers for Unet"""
-    HENormal = 'he_normal'
-    GlorotUniform = 'glorot_uniform'
-    RandomUniform = 'random_uniform'

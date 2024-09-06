@@ -8,16 +8,24 @@ This is a fork of the [crack_detection_CNN_masonry repoistory](https://github.co
 * Add better generalizability through the use of configuration files and enhanced dataset support. Add support for more segmentation models.
 * Dependency cleanup: clearly indicate all dependencies through a `requirements.txt` file and make the framework compatible with modern Tensorflow.
 
-The core functionality of the original repository is retained, meaning that when using the same parameters, the same results as the original repository are obtained. For changes compared to the original repo, please have a look at the [PR descriptions](https://github.com/DavidHidde/CNN-masonry-crack-tasks/pulls?q=is%3Apr+is%3Aclosed+).
+For changes compared to the original repo, please have a look at the [PR descriptions](https://github.com/DavidHidde/CNN-masonry-crack-tasks/pulls?q=is%3Apr+is%3Aclosed+). The main changes include:
+
+* Focal loss computation now uses the Tensorflow implementation rather than a custom implementation.
+* Unet now only uses the segmentation models variant rather than a custom one depending on the use of a backbone. The Unet parameters have also been updated to use transpose layers in the decoder, matching the paper.
+* DeepCrack uses a new [implementation](https://github.com/DavidHidde/DeepCrack-Tensorflow).
+* Newer package versions, meaning that some things might be slightly different.
+
+Overall, the core functionality is retained but updated to work with modern setups, be more flexible as well as maintainable. Some results might differ from the original paper, but it is clear that the forked repo does not fully represent the original paper due to its broken state and lack of crack classification support.
 
 ## Installation
 
 The project makes use of multiple dependencies. To install these, simply run `pip3 install -r requirements.txt`.  
 
-Like the original repo, some files must currently be copied over from other repos in order for some configurations to work:
->   In order to use the Deeplabv3 network copy model.py to the networks folder.  
-    In order to use the DeepCrack network copy edeepcrack_cls.py and indices_pooling.py to the networks folder.
+Like the original repo, some files must currently be copied over from other repos in order for some configurations to work. This repo solves it through Git submodules:
 
+```bash
+git submodule init --recursive
+```
 
 ## Usage
 
@@ -69,7 +77,6 @@ In case you use or find interesting their work please cite the following journal
 # References
 The following codes are based on material provided by **[Adrian Rosebrock](linkedin.com/in/adrian-rosebrock-59b8732a)** shared on his blog (**https://www.pyimagesearch.com/**) and his books:
 
-* `build_data.py`  
 * `hdf5datasetgenerator_mask.py`  
 * `hdf5datasetwriter_mask.py`
 * `epochcheckpoint.py`
@@ -80,8 +87,6 @@ The following codes are based on material provided by **[Adrian Rosebrock](linke
 - Adrian Rosebrock, How to use Keras fit and fit_generator (a hands-on tutorial), PyImageSearch, https://www.pyimagesearch.com/2018/12/24/how-to-use-keras-fit-and-fit_generator-a-hands-on-tutorial/, accessed on 24 February 2021  
 
 The Segmentation Models with pre-trained CNNs are implemented based on the work of **[Pavel Yakubovskiy](https://github.com/qubvel)** and his GitHub Repository https://github.com/qubvel/segmentation_models  
-
-**DeepCrack** is implemented as provided by the corresponding [GitHub Repository](https://github.com/hanshenChen/crack-detection)  
 
 **Deeplabv3** is implemented as provided by the corresponding [GitHub Repository](https://github.com/tensorflow/models/tree/master/research/deeplab)  
 
