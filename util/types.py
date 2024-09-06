@@ -72,9 +72,3 @@ class BackboneType(Enum):
     EfficientNetB5 = 'efficientnetb5'
     EfficientNetB6 = 'efficientnetb6'
     EfficientNetB7 = 'efficientnetb7'
-
-class UnetWeightInitializerType(Enum):
-    """Type of weight intializers for Unet"""
-    HENormal = 'he_normal'
-    GlorotUniform = 'glorot_uniform'
-    RandomUniform = 'random_uniform'

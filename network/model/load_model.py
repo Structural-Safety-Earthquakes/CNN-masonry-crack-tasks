@@ -33,13 +33,14 @@ def load_model(config: Config) -> Model:
     # Load the model file. Some model types are exceptions, but generally we can simply load a JSON.
     if config.model == ModelType.DeepCrack:
         sys.path.append(os.path.join(os.getcwd(), 'libs', 'deepcrack'))
-        from edeepcrack_cls import Deepcrack  # Requires Git submodule to be loaded
-        model = Deepcrack(input_shape=(config.batch_size, *config.dataset_config.image_dims))
+        from model import DeepCrack  # Requires Git submodule to be loaded
+
+        model = DeepCrack(input_shape=(config.batch_size, *config.dataset_config.image_dims))
         model.load_weights(weights_file)
         return model
 
     if config.model == ModelType.DeepLabV3:
-        pass # TODO: implement
+        raise NotImplementedError('DeepLabV3 is not yet implemented.')
 
     # Open the file and load the model and weights
     with open(config.output_model_file, 'r') as model_json_file:

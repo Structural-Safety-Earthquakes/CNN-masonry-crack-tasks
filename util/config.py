@@ -7,7 +7,7 @@ import yaml
 from yaml import SafeLoader
 
 from util.dataset_config import DatasetConfig, load_data_config
-from util.types import OptimizerType, ModelType, BackboneType, UnetWeightInitializerType, LossType
+from util.types import OptimizerType, ModelType, BackboneType, LossType
 
 # Path constants, change at your own leisure
 OUTPUT_ROOT_DIR: str = 'output'
@@ -29,7 +29,7 @@ class Config:
 
     # Model info
     model: ModelType
-    backbone: BackboneType
+    backbone: Union[BackboneType, None]
     use_pretrained: bool
 
     # Learning process info
@@ -71,13 +71,6 @@ class Config:
     START_EPOCH: int = 0
     MONITOR_METRIC: str = 'f1_score_dilated'
 
-    UNET_NUM_FILTERS: int = 64
-    UNET_LAYER_WEIGHT_INITIALIZERS: UnetWeightInitializerType = UnetWeightInitializerType.HENormal
-
-    FOCAL_LOSS_ALPHA: float = 0.25
-    FOCAL_LOSS_GAMMA: float = 2.0
-    WCE_BETA: float = 10
-
 def load_config(config_filename: str, dataset_config_filename) -> Config:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
 
@@ -90,7 +83,7 @@ def load_config(config_filename: str, dataset_config_filename) -> Config:
     config = Config(
         id=str(config_vals['id']),
         model=ModelType(config_vals['model']),
-        backbone=BackboneType(config_vals['backbone']),
+        backbone=BackboneType(config_vals['backbone']) if config_vals.get('backbone') else None,
         use_pretrained=bool(config_vals['use_pretrained']),
         batch_size=int(config_vals['batch_size']),
         batch_normalization=bool(config_vals['batch_normalization']),

@@ -2,8 +2,8 @@ import os
 
 from network.loss import determine_loss_function
 from network.metrics import get_standard_metrics
+from network.model import build_model
 from network.optimizer import determine_optimizer
-from network_class import Network
 from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -15,31 +15,15 @@ from util.config import Config
 def train_model(config: Config):
     """Train a model given the specific config."""
 
-    # TODO: remove args by refactoring dependencies
-    args = {
-        'main': os.getcwd(),
-        'opt': config.optimizer.value,
-        'regularization': config.regularization,
-        'model': f'sm_{config.model.value}_{config.backbone.value}' if config.backbone is not None else config.model.value,
-        'dropout': config.dropout,
-        'batchnorm': config.batch_normalization,
-        'init': config.UNET_LAYER_WEIGHT_INITIALIZERS.value,
-        'encoder_weights': 'imagenet' if config.use_pretrained else None
-    }
-
     #%%
     # Prepare model for training
     #
-    model = Network(
-        args,
-        config.dataset_config.image_dims,
-        config.UNET_NUM_FILTERS,
-        config.batch_size,
-        config.initial_learning_rate,
-        determine_optimizer(config),
-        determine_loss_function(config),
-        get_standard_metrics()
-    ).define_Network()
+    model = build_model(config)
+    model.compile(
+        optimizer=determine_optimizer(config),
+        loss=determine_loss_function(config),
+        metrics=[get_standard_metrics()]
+    )
 
     # Data augmentation for training and validation sets
     if config.augment_data:

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from network.model.load_model import load_model
+from network.model import load_model
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from subroutines.visualize_predictions import Visualize_Predictions
 from util.config import Config

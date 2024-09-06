@@ -7,15 +7,19 @@ from util.config import Config
 from util.types import LossType
 
 
+FOCAL_LOSS_ALPHA = 0.25
+FOCAL_LOSS_GAMMA = 2.0
+WCE_BETA = 10
+
 def determine_loss_function(config: Config) -> Callable[[tf.Tensor, tf.Tensor], tf.Tensor]:
     """Determine the loss function using the config and function specific values around it."""
     match config.loss:
         case LossType.FocalLoss:
-            return tf.keras.losses.BinaryFocalCrossentropy(from_logits=False, apply_class_balancing=False, alpha=config.FOCAL_LOSS_ALPHA, gamma=config.FOCAL_LOSS_GAMMA)
+            return tf.keras.losses.BinaryFocalCrossentropy(from_logits=False, apply_class_balancing=False, alpha=FOCAL_LOSS_ALPHA, gamma=FOCAL_LOSS_GAMMA)
         case LossType.BCE:
             return tf.keras.losses.BinaryCrossentropy()
         case LossType.WCE:
-            return weighted_cross_entropy(config.WCE_BETA)
+            return weighted_cross_entropy(WCE_BETA)
         case LossType.F1Score:
             return f1_score_loss(False)
         case LossType.F1ScoreDilate:

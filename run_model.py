@@ -1,19 +1,16 @@
 import os
 
-from util.dataset_config import load_data_config
-
 os.environ['TF_USE_LEGACY_KERAS'] = '1' # Fall back to Keras 2. We need this before loading **anything** else
 os.environ['SM_FRAMEWORK'] = 'tf.keras'
 
 import argparse
-import tensorflow as tf
 
 from build import process_dataset
 from test import generate_predictions
 from train import train_model
 from visualize import visualize_architecture
 from util.config import load_config
-from util.types import RunMode, ModelType
+from util.types import RunMode
 
 
 def run_model():
@@ -28,10 +25,6 @@ def run_model():
     parser.add_argument('--dataset', '-d', help='Dataset config file', type=str, required=True)
     args = parser.parse_args()
     config = load_config(args.config, args.dataset)
-
-    # When using DeepCrack, eager execution needs to be enabled
-    if config.model == ModelType.DeepCrack:
-        tf.enable_eager_execution()
 
     # Run actual program depending on mode
     if args.mode == RunMode.BUILD:
