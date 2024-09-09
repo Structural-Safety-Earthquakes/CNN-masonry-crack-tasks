@@ -22,8 +22,4 @@
   # Output/logging info
   save_model: false,
   epochs_per_checkpoint: 5,
-
-  # Prediction settings
-  dilate_labels: true,
-  weights_file:,
 }

@@ -8,13 +8,12 @@ from util.config import NetworkConfig, OutputConfig
 from util.types import ModelType
 
 
-def load_model(network_config: NetworkConfig, output_config: OutputConfig, input_dims: tuple[int, int, int]) -> Model:
+def load_model(network_config: NetworkConfig, output_config: OutputConfig, input_dims: tuple[int, int, int], weights_file: str) -> Model:
     """
     Load the model indicated in the config file.
     If none are indicated, take the best performing model for the current dataset-network combination.
     """
     # Resolve missing target by taking best performing model from the weights and model folder.
-    weights_file = network_config.weights_file
     if weights_file is None:
         candidates = [weight for weight in os.listdir(output_config.output_weights_dir) if weight.endswith('.h5')]
         best_value = '0000000000000'
@@ -25,9 +24,15 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
         if best_value != '0000000000000':
             weights_file = best_value
         else:
-            raise ValueError('Please provide a valid model file or train a model using the current dataset-network combination.')
+            raise ValueError('Please provide a valid model file for the current network or train a model using the current dataset-network combination.')
 
-    weights_file = os.path.join(output_config.output_weights_dir, weights_file)
+    # If the weights file is not a path, prefix the weights directory to it.
+    if not os.sep in weights_file:
+        weights_file = os.path.join(output_config.output_weights_dir, weights_file)
+
+    if not os.path.exists(weights_file) or output_config.network_dir not in weights_file:
+        raise ValueError('Please provide a valid model file for the current network or train a model using the current dataset-network combination.')
+
     print(f'Using model {output_config.output_model_file} and {weights_file} for weights.')
 
     # Load the model file. Some model types are exceptions, but generally we can simply load a JSON.

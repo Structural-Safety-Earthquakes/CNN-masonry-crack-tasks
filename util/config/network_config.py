@@ -34,10 +34,6 @@ class NetworkConfig:
     save_model: bool    # Whether to save the entire model (or if False, the weights)
     epochs_per_checkpoint: int
 
-    # Prediction settings
-    dilate_labels: bool
-    weights_file: Union[str, None] # Takes the highest trained model in case of None
-
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
     MONITOR_METRIC: str = 'f1_score_dilated'
@@ -65,8 +61,6 @@ def load_network_config(config_filename: str) -> NetworkConfig:
         binarize_labels=bool(config_vals['binarize_labels']),
         save_model=bool(config_vals['save_model']),
         epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
-        dilate_labels=bool(config_vals['dilate_labels']),
-        weights_file=config_vals['weights_file'] if config_vals.get('weights_file') is not None else None,
     )
 
     return config

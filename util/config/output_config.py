@@ -28,6 +28,8 @@ TXT_SUMMARY_FILE: str = 'summary.txt'
 @dataclass(slots=True)
 class OutputConfig:
     """Config specifying all output directories/files."""
+    # Network specific (using network_id)
+    network_dir: Union[str, None]
 
     # Dataset specific (using dataset_id)
     dataset_images_dir: Union[str, None]
@@ -49,7 +51,9 @@ class OutputConfig:
 
 def load_output_config(network_id: Union[str, None] = None, dataset_id: Union[str, None] = None) -> OutputConfig:
     """Load an output config using either the network_id, dataset_id or both."""
-    output_config = OutputConfig(*([None] * 14))
+    output_config = OutputConfig(*([None] * 15))
+    if network_id is not None:
+        output_config.network_dir = os.path.join(OUTPUT_ROOT_DIR, network_id)
 
     if dataset_id is not None:
         dataset_dir = os.path.join(DATASETS_ROOT_DIR, dataset_id)
