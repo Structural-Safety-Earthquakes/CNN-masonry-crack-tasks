@@ -24,15 +24,15 @@ class Test(Operation):
         # TODO: remove args by refactoring dependencies
         args = {
             'main': os.getcwd(),
-            'EVAL_HDF5': output_config.dataset_validation_set_file,
-            'predictions_subfolder': output_config.output_predictions_dir + os.sep,
+            'EVAL_HDF5': output_config.validation_set_file,
+            'predictions_subfolder': output_config.predictions_dir + os.sep,
             'predictions_dilate': dilate
         }
         model = load_model(network_config, output_config, dataset_config.image_dims, weights)
 
         # Do not use data augmentation when evaluating model: aug=None
         eval_gen = HDF5DatasetGeneratorMask(
-            output_config.dataset_validation_set_file,
+            output_config.validation_set_file,
             network_config.batch_size,
             aug=None,
             shuffle=False,

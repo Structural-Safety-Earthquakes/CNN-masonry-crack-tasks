@@ -49,14 +49,14 @@ class Train(Operation):
 
         # Load data generators
         train_gen = HDF5DatasetGeneratorMask(
-            output_config.dataset_train_set_file,
+            output_config.train_set_file,
             network_config.batch_size,
             aug=aug,
             shuffle=False,
             binarize=network_config.binarize_labels
         )
         val_gen = HDF5DatasetGeneratorMask(
-            output_config.dataset_validation_set_file,
+            output_config.validation_set_file,
             network_config.batch_size,
             aug=aug,
             shuffle=False,
@@ -67,12 +67,12 @@ class Train(Operation):
 
         # Callback that streams epoch results to a CSV file
         # https://keras.io/api/callbacks/csv_logger/
-        csv_logger = CSVLogger(output_config.output_log_file, append=True, separator=';')
+        csv_logger = CSVLogger(output_config.log_file, append=True, separator=';')
 
         # Serialize model to JSON
         try:
             model_json = model.to_json()
-            with open(output_config.output_model_file, 'w') as json_file:
+            with open(output_config.model_file, 'w') as json_file:
                 json_file.write(model_json)
         except:
             print('Warning: Unable to write model.json!!')
@@ -81,11 +81,11 @@ class Train(Operation):
         # Refer to the documentation of ModelCheckpoint for extra details
         # https://keras.io/api/callbacks/model_checkpoint/
         template_name = f'epoch_{{epoch}}_{network_config.MONITOR_METRIC}_{{val_{network_config.MONITOR_METRIC}:.3f}}.h5'
-        checkpoint_file = os.path.join(output_config.checkpoints_dir, template_name) if network_config.save_model else os.path.join(output_config.output_weights_dir, template_name)
+        checkpoint_file = os.path.join(output_config.checkpoints_dir, template_name) if network_config.save_model else os.path.join(output_config.weights_dir, template_name)
 
         epoch_checkpoint = EpochCheckpoint(
             output_config.checkpoints_dir,
-            output_config.output_weights_dir,
+            output_config.weights_dir,
             'model' if network_config.save_model else 'weights',
             every=network_config.epochs_per_checkpoint,
             startAt=network_config.START_EPOCH,
@@ -93,8 +93,8 @@ class Train(Operation):
             counter='0'
         )
         training_monitor = TrainingMonitor(
-            output_config.output_progression_file,
-            jsonPath=output_config.output_metrics_file,
+            output_config.progression_file,
+            jsonPath=output_config.metrics_file,
             startAt=network_config.START_EPOCH,
             metric=network_config.MONITOR_METRIC
         )

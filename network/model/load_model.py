@@ -15,7 +15,7 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
     """
     # Resolve missing target by taking best performing model from the weights and model folder.
     if weights_file is None:
-        candidates = [weight for weight in os.listdir(output_config.output_weights_dir) if weight.endswith('.h5')]
+        candidates = [weight for weight in os.listdir(output_config.weights_dir) if weight.endswith('.h5')]
         best_value = '0000000000000'
         for candidate in candidates:
             if candidate[-6:-3] > best_value[-6:-3]:
@@ -28,12 +28,12 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
 
     # If the weights file is not a path, prefix the weights directory to it.
     if not os.sep in weights_file:
-        weights_file = os.path.join(output_config.output_weights_dir, weights_file)
+        weights_file = os.path.join(output_config.weights_dir, weights_file)
 
     if not os.path.exists(weights_file) or output_config.network_dir not in weights_file:
         raise ValueError('Please provide a valid model file for the current network or train a model using the current dataset-network combination.')
 
-    print(f'Using model {output_config.output_model_file} and {weights_file} for weights.')
+    print(f'Using model {output_config.model_file} and {weights_file} for weights.')
 
     # Load the model file. Some model types are exceptions, but generally we can simply load a JSON.
     if network_config.model == ModelType.DeepCrack:
@@ -48,7 +48,7 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
         raise NotImplementedError('DeepLabV3 is not yet implemented.')
 
     # Open the file and load the model and weights
-    with open(output_config.output_model_file, 'r') as model_json_file:
+    with open(output_config.model_file, 'r') as model_json_file:
         model = model_from_json(model_json_file.read())
     model.load_weights(weights_file)
 

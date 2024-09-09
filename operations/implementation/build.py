@@ -20,15 +20,15 @@ class Build(Operation):
         output_config = load_output_config(dataset_id=dataset_config.dataset_dir)
 
         # Grab the paths to the images and masks and sort them to ensure everything is properly in order.
-        img_paths = list(paths.list_images(output_config.dataset_images_dir))
-        label_paths = list(paths.list_images(output_config.dataset_labels_dir))
+        img_paths = list(paths.list_images(output_config.images_dir))
+        label_paths = list(paths.list_images(output_config.labels_dir))
         img_paths.sort()
         label_paths.sort()
 
         if dataset_config.validation_split_percent == 0.:  # Only training data
-            datasets = [(list(zip(img_paths, label_paths)), output_config.dataset_train_set_file)]
+            datasets = [(list(zip(img_paths, label_paths)), output_config.train_set_file)]
         elif dataset_config.validation_split_percent == 1.:  # Only validation data
-            datasets = [(list(zip(img_paths, label_paths)), output_config.dataset_validation_set_file)]
+            datasets = [(list(zip(img_paths, label_paths)), output_config.validation_set_file)]
         else:  # Perform stratified sampling from the training set to build the testing split from the training data
             train_img_split, val_img_split, train_label_split, val_label_split = train_test_split(
                 img_paths,
@@ -40,8 +40,8 @@ class Build(Operation):
             # Construct a list pairing the training, validation, and testing image paths along with their corresponding labels
             # and output HDF5 files
             datasets = [
-                (list(zip(train_img_split, train_label_split)), output_config.dataset_train_set_file),
-                (list(zip(val_img_split, val_label_split)), output_config.dataset_validation_set_file)
+                (list(zip(train_img_split, train_label_split)), output_config.train_set_file),
+                (list(zip(val_img_split, val_label_split)), output_config.validation_set_file)
             ]
 
         # Loop over the dataset tuples

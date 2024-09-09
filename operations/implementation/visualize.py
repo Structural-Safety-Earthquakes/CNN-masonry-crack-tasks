@@ -29,10 +29,10 @@ class Visualize(Operation):
         )
 
         # Create a visual plot
-        plot_model(model, to_file=output_config.output_figure_file, show_shapes=True)
+        plot_model(model, to_file=output_config.figure_file, show_shapes=True)
 
         # Create a txt summary
-        with open(output_config.output_txt_summary_file, 'w') as f:
+        with open(output_config.txt_summary_file, 'w') as f:
             with redirect_stdout(f):
                 model.summary()
 
