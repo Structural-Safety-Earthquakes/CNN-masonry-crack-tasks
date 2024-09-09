@@ -3,7 +3,7 @@ File containing many input types used for matching to avoid string matching.
 """
 from enum import Enum
 
-class RunMode(Enum):
+class OperationType(Enum):
     """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset, visualize visualizes the architecture."""
     TRAIN = 'train'
     TEST = 'test'
