@@ -5,7 +5,7 @@ import tempfile
 import tensorflow as tf
 import segmentation_models as sm
 
-from util.config.network_config import NetworkConfig
+from util.config import NetworkConfig
 from util.types import ModelType
 
 OUTPUT_NUM_CLASSES = 1
@@ -50,59 +50,59 @@ def add_regularization(model: tf.keras.Model, regularization: float) -> tf.keras
     new_model.load_weights(tmp_weights_path, by_name=True)
     return model
 
-def build_model(config: NetworkConfig) -> tf.keras.Model:
+def build_model(network_config: NetworkConfig, input_dims: tuple[int, int, int]) -> tf.keras.Model:
     """
     Build the model itself. Note that this does not mean **compiling** the model, this still needs to be done afterwards.
     We just go past each case individually to ensure we set proper parameters.
     """
     sm_model_kwargs = {
-        'input_shape': config.dataset_config.image_dims,
+        'input_shape': input_dims,
         'classes': OUTPUT_NUM_CLASSES,
         'activation': OUTPUT_ACTIVATION,
-        'encoder_weights': 'imagenet' if config.use_pretrained else None,
+        'encoder_weights': 'imagenet' if network_config.use_pretrained else None,
     }
-    if config.backbone is not None:
-        sm_model_kwargs['backbone_name']: config.backbone.value
+    if network_config.backbone is not None:
+        sm_model_kwargs['backbone_name']: network_config.backbone.value
 
-    match config.model:
+    match network_config.model:
         case ModelType.DeepCrack:
             sys.path.append(os.path.join(os.getcwd(), 'libs', 'deepcrack'))
             from model import DeepCrack  # Requires Git submodule to be loaded
 
-            model = DeepCrack(input_shape=(config.batch_size, *config.dataset_config.image_dims))
+            model = DeepCrack(input_shape=(network_config.batch_size, *input_dims))
         case ModelType.DeepLabV3:
             raise NotImplementedError('DeepLabV3 is not yet implemented.')
         case ModelType.Unet:
             model = sm.Unet(
                 decoder_filters=UNET_DECODER_FILTERS,
                 decoder_block_type=UNET_DECODER_BLOCK_TYPE,
-                decoder_use_batchnorm=config.batch_normalization,
+                decoder_use_batchnorm=network_config.batch_normalization,
                 **sm_model_kwargs
             )
         case ModelType.PSPNet:
             model = sm.PSPNet(
                 psp_conv_filters=PSP_CONV_FILTERS,
-                psp_dropout=config.dropout,
-                psp_use_batchnorm=config.batch_normalization,
+                psp_dropout=network_config.dropout,
+                psp_use_batchnorm=network_config.batch_normalization,
                 **sm_model_kwargs
             )
         case ModelType.FPN:
             model = sm.FPN(
                 pyramid_block_filters=FPN_BLOCK_FILTERS,
-                pyramid_dropout=config.dropout,
+                pyramid_dropout=network_config.dropout,
                 **sm_model_kwargs
             )
         case ModelType.LinkNet:
             model = sm.Linknet(
                 decoder_filters=LINKNET_DECODER_FILTERS,
                 decoder_block_type=LINKNET_DECODER_BLOCK_TYPE,
-                decoder_use_batchnorm=config.batch_normalization,
+                decoder_use_batchnorm=network_config.batch_normalization,
                 **sm_model_kwargs
             )
         case _:
-            raise ValueError(f'Unknown model type: {config.model}')
+            raise ValueError(f'Unknown model type: {network_config.model}')
 
-    if config.regularization:
-        model = add_regularization(model, config.regularization)
+    if network_config.regularization:
+        model = add_regularization(model, network_config.regularization)
 
     return model

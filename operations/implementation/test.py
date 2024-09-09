@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import Any
 
 from operations.operation import Operation
@@ -7,7 +6,7 @@ import operations.arguments as arguments
 from network.model import load_model
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from subroutines.visualize_predictions import Visualize_Predictions
-from util.config import load_network_config, load_data_config
+from util.config import load_network_config, load_data_config, load_output_config
 
 
 class Test(Operation):
@@ -15,21 +14,22 @@ class Test(Operation):
 
     def __call__(self, dataset: str, network: str) -> None:
         """Generate the predictions given a specific configuration."""
-        network_config = load_network_config(network, dataset)
+        network_config = load_network_config(network)
         dataset_config = load_data_config(dataset)
+        output_config = load_output_config(network_id=network_config.id, dataset_id=dataset_config.dataset_dir)
 
         # TODO: remove args by refactoring dependencies
         args = {
             'main': os.getcwd(),
-            'EVAL_HDF5': dataset_config.dataset_validation_set_file,
-            'predictions_subfolder': network_config.output_predictions_dir + os.sep,
+            'EVAL_HDF5': output_config.dataset_validation_set_file,
+            'predictions_subfolder': output_config.output_predictions_dir + os.sep,
             'predictions_dilate': network_config.dilate_labels
         }
-        model = load_model(network_config)
+        model = load_model(network_config, output_config, dataset_config.image_dims)
 
         # Do not use data augmentation when evaluating model: aug=None
         eval_gen = HDF5DatasetGeneratorMask(
-            dataset_config.dataset_validation_set_file,
+            output_config.dataset_validation_set_file,
             network_config.batch_size,
             aug=None,
             shuffle=False,
@@ -48,7 +48,6 @@ class Test(Operation):
         # Create a plot with original image, ground truth and prediction
         # Show the metrics for the prediction
         # Output will be stored in the predictions folder
-        Path(network_config.output_predictions_dir).parent.mkdir(exist_ok=True)
         Visualize_Predictions(args, predictions)
 
     def get_cli_arguments(self) -> list[dict[str, Any]]:

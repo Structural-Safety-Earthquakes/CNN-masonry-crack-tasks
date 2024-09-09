@@ -11,7 +11,7 @@ from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
-from util.config import load_network_config, load_data_config
+from util.config import load_network_config, load_data_config, load_output_config
 
 
 class Train(Operation):
@@ -19,13 +19,14 @@ class Train(Operation):
 
     def __call__(self, dataset: str, network: str) -> None:
         """Start training a model on a dataset."""
-        network_config = load_network_config(network, dataset)
+        network_config = load_network_config(network)
         dataset_config = load_data_config(dataset)
+        output_config = load_output_config(network_id=network_config.id, dataset_id=dataset_config.dataset_dir)
 
         # %%
         # Prepare model for training
         #
-        model = build_model(network_config)
+        model = build_model(network_config, dataset_config.image_dims)
         model.compile(
             optimizer=determine_optimizer(network_config),
             loss=determine_loss_function(network_config),
@@ -48,14 +49,14 @@ class Train(Operation):
 
         # Load data generators
         train_gen = HDF5DatasetGeneratorMask(
-            dataset_config.dataset_train_set_file,
+            output_config.dataset_train_set_file,
             network_config.batch_size,
             aug=aug,
             shuffle=False,
             binarize=network_config.binarize_labels
         )
         val_gen = HDF5DatasetGeneratorMask(
-            network_config.dataset_config.dataset_validation_set_file,
+            output_config.dataset_validation_set_file,
             network_config.batch_size,
             aug=aug,
             shuffle=False,
@@ -66,12 +67,12 @@ class Train(Operation):
 
         # Callback that streams epoch results to a CSV file
         # https://keras.io/api/callbacks/csv_logger/
-        csv_logger = CSVLogger(network_config.output_log_file, append=True, separator=';')
+        csv_logger = CSVLogger(output_config.output_log_file, append=True, separator=';')
 
         # Serialize model to JSON
         try:
             model_json = model.to_json()
-            with open(network_config.output_model_file, 'w') as json_file:
+            with open(output_config.output_model_file, 'w') as json_file:
                 json_file.write(model_json)
         except:
             print('Warning: Unable to write model.json!!')
@@ -80,11 +81,11 @@ class Train(Operation):
         # Refer to the documentation of ModelCheckpoint for extra details
         # https://keras.io/api/callbacks/model_checkpoint/
         template_name = f'epoch_{{epoch}}_{network_config.MONITOR_METRIC}_{{val_{network_config.MONITOR_METRIC}:.3f}}.h5'
-        checkpoint_file = os.path.join(network_config.output_checkpoints_dir, template_name) if network_config.save_model else os.path.join(network_config.output_weights_dir, template_name)
+        checkpoint_file = os.path.join(output_config.checkpoints_dir, template_name) if network_config.save_model else os.path.join(output_config.output_weights_dir, template_name)
 
         epoch_checkpoint = EpochCheckpoint(
-            network_config.output_checkpoints_dir,
-            network_config.output_weights_dir,
+            output_config.checkpoints_dir,
+            output_config.output_weights_dir,
             'model' if network_config.save_model else 'weights',
             every=network_config.epochs_per_checkpoint,
             startAt=network_config.START_EPOCH,
@@ -92,8 +93,8 @@ class Train(Operation):
             counter='0'
         )
         training_monitor = TrainingMonitor(
-            network_config.output_figure_file,
-            jsonPath=network_config.output_metrics_file,
+            output_config.output_progression_file,
+            jsonPath=output_config.output_metrics_file,
             startAt=network_config.START_EPOCH,
             metric=network_config.MONITOR_METRIC
         )

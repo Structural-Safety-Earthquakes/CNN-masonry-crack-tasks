@@ -8,7 +8,7 @@ from operations.operation import Operation
 import operations.arguments as arguments
 from typing import Any
 from subroutines.HDF5 import HDF5DatasetWriterMask
-from util.config import load_data_config
+from util.config import load_data_config, load_output_config
 
 
 class Build(Operation):
@@ -16,31 +16,32 @@ class Build(Operation):
 
     def __call__(self, dataset: str) -> None:
         """Process the dataset into a training and validation set."""
-        config = load_data_config(dataset)
+        dataset_config = load_data_config(dataset)
+        output_config = load_output_config(dataset_id=dataset_config.dataset_dir)
 
         # Grab the paths to the images and masks and sort them to ensure everything is properly in order.
-        img_paths = list(paths.list_images(config.dataset_images_dir))
-        label_paths = list(paths.list_images(config.dataset_labels_dir))
+        img_paths = list(paths.list_images(output_config.dataset_images_dir))
+        label_paths = list(paths.list_images(output_config.dataset_labels_dir))
         img_paths.sort()
         label_paths.sort()
 
-        if config.validation_split_percent == 0.:  # Only training data
-            datasets = [(list(zip(img_paths, label_paths)), config.dataset_train_set_file)]
-        elif config.validation_split_percent == 1.:  # Only validation data
-            datasets = [(list(zip(img_paths, label_paths)), config.dataset_validation_set_file)]
+        if dataset_config.validation_split_percent == 0.:  # Only training data
+            datasets = [(list(zip(img_paths, label_paths)), output_config.dataset_train_set_file)]
+        elif dataset_config.validation_split_percent == 1.:  # Only validation data
+            datasets = [(list(zip(img_paths, label_paths)), output_config.dataset_validation_set_file)]
         else:  # Perform stratified sampling from the training set to build the testing split from the training data
             train_img_split, val_img_split, train_label_split, val_label_split = train_test_split(
                 img_paths,
                 label_paths,
-                test_size=config.validation_split_percent,
+                test_size=dataset_config.validation_split_percent,
                 random_state=42
             )
 
             # Construct a list pairing the training, validation, and testing image paths along with their corresponding labels
             # and output HDF5 files
             datasets = [
-                (list(zip(train_img_split, train_label_split)), config.dataset_train_set_file),
-                (list(zip(val_img_split, val_label_split)), config.dataset_validation_set_file)
+                (list(zip(train_img_split, train_label_split)), output_config.dataset_train_set_file),
+                (list(zip(val_img_split, val_label_split)), output_config.dataset_validation_set_file)
             ]
 
         # Loop over the dataset tuples
@@ -48,7 +49,7 @@ class Build(Operation):
             print("[INFO] building {}...".format(output_file))
 
             # Create HDF5 writer
-            writer = HDF5DatasetWriterMask((len(data_pairs), *config.image_dims), output_file)
+            writer = HDF5DatasetWriterMask((len(data_pairs), *dataset_config.image_dims), output_file)
 
             # initialize the progress bar
             widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
@@ -60,10 +61,10 @@ class Build(Operation):
                 image = cv2.imread(im_path)
                 label = cv2.imread(label_path, 0)
 
-                if config.image_dims != image.shape:
-                    image = resize(image, config.image_dims, mode='constant', preserve_range=True)
-                if config.image_dims[:2] != label.shape:
-                    label = resize(label, config.image_dims[:2], mode='constant', preserve_range=True)
+                if dataset_config.image_dims != image.shape:
+                    image = resize(image, dataset_config.image_dims, mode='constant', preserve_range=True)
+                if dataset_config.image_dims[:2] != label.shape:
+                    label = resize(label, dataset_config.image_dims[:2], mode='constant', preserve_range=True)
 
                 # Normalize intensity values: [0,1]
                 label = np.expand_dims(label, axis=-1)

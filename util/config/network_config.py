@@ -1,26 +1,11 @@
-import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Union
 
 import yaml
 from yaml import SafeLoader
 
-from util.config.dataset_config import DatasetConfig, load_data_config
 from util.types import OptimizerType, ModelType, BackboneType, LossType
 
-# Path constants, change at your own leisure
-OUTPUT_ROOT_DIR: str = 'output'
-OUTPUT_CHECKPOINTS_DIR: str = 'checkpoints'
-OUTPUT_PREDICTIONS_DIR: str = 'predictions'
-OUTPUT_WEIGHTS_DIR: str = 'weights'
-OUTPUT_MODELS_DIR: str = 'models'
-LOG_FILE: str = 'log.csv'
-MODEL_FILE: str = 'model.json'
-METRICS_FILE: str = 'metrics.json'
-FIGURE_FILE: str = 'figure.png'
-NETWORK_FIGURE_FILE: str = 'network.png'
-TXT_SUMMARY_FILE: str = 'summary.txt'
 
 @dataclass(slots=True)
 class NetworkConfig:
@@ -49,33 +34,16 @@ class NetworkConfig:
     save_model: bool    # Whether to save the entire model (or if False, the weights)
     epochs_per_checkpoint: int
 
-    output_checkpoints_dir: str # Inferred, uses id
-    output_predictions_dir: str # Inferred, uses id
-    output_weights_dir: str # Inferred, uses id
-    output_models_dir: str # Inferred, uses id
-    output_log_file: str # Inferred, uses id
-    output_model_file: str # Inferred, uses id
-    output_metrics_file: str # Inferred, uses id
-    output_figure_file: str # Inferred, uses id
-    output_network_figure_file: str # Inferred, uses id
-    output_txt_summary_file: str # Inferred, uses id
-
     # Prediction settings
     dilate_labels: bool
     weights_file: Union[str, None] # Takes the highest trained model in case of None
-
-    # Nested configs
-    dataset_config: DatasetConfig
 
     # Run-time constants, change at your own leisure
     START_EPOCH: int = 0
     MONITOR_METRIC: str = 'f1_score_dilated'
 
-def load_network_config(config_filename: str, dataset_config_filename) -> NetworkConfig:
+def load_network_config(config_filename: str) -> NetworkConfig:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
-
-    dataset_config = load_data_config(dataset_config_filename)
-
     with open(config_filename, 'r') as config_file:
         config_vals = yaml.load(config_file, Loader=SafeLoader)
 
@@ -97,25 +65,8 @@ def load_network_config(config_filename: str, dataset_config_filename) -> Networ
         binarize_labels=bool(config_vals['binarize_labels']),
         save_model=bool(config_vals['save_model']),
         epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
-        output_checkpoints_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_CHECKPOINTS_DIR),
-        output_predictions_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_PREDICTIONS_DIR),
-        output_weights_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_WEIGHTS_DIR),
-        output_models_dir=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, OUTPUT_MODELS_DIR),
-        output_log_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, LOG_FILE),
-        output_model_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, MODEL_FILE),
-        output_metrics_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, METRICS_FILE),
-        output_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], dataset_config.dataset_dir, FIGURE_FILE),
-        output_network_figure_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], NETWORK_FIGURE_FILE),
-        output_txt_summary_file=os.path.join(OUTPUT_ROOT_DIR, config_vals['id'], TXT_SUMMARY_FILE),
         dilate_labels=bool(config_vals['dilate_labels']),
         weights_file=config_vals['weights_file'] if config_vals.get('weights_file') is not None else None,
-        dataset_config=dataset_config
     )
-
-    # Create dirs that don't exist
-    Path(config.output_checkpoints_dir).mkdir(parents=True, exist_ok=True)
-    Path(config.output_predictions_dir).mkdir(parents=True, exist_ok=True)
-    Path(config.output_weights_dir).mkdir(parents=True, exist_ok=True)
-    Path(config.output_models_dir).mkdir(parents=True, exist_ok=True)
 
     return config
