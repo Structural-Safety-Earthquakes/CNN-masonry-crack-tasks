@@ -11,8 +11,7 @@ from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
-from util.config import load_config
-from util.dataset_config import load_data_config
+from util.config import load_network_config, load_data_config
 
 
 class Train(Operation):
@@ -20,7 +19,7 @@ class Train(Operation):
 
     def __call__(self, dataset: str, network: str) -> None:
         """Start training a model on a dataset."""
-        network_config = load_config(network, dataset)
+        network_config = load_network_config(network, dataset)
         dataset_config = load_data_config(dataset)
 
         # %%

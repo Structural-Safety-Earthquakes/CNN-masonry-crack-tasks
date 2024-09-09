@@ -7,8 +7,7 @@ import operations.arguments as arguments
 from network.model import load_model
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from subroutines.visualize_predictions import Visualize_Predictions
-from util.config import load_config
-from util.dataset_config import load_data_config
+from util.config import load_network_config, load_data_config
 
 
 class Test(Operation):
@@ -16,7 +15,7 @@ class Test(Operation):
 
     def __call__(self, dataset: str, network: str) -> None:
         """Generate the predictions given a specific configuration."""
-        network_config = load_config(network, dataset)
+        network_config = load_network_config(network, dataset)
         dataset_config = load_data_config(dataset)
 
         # TODO: remove args by refactoring dependencies

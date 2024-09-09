@@ -3,7 +3,7 @@ from typing import Callable
 import tensorflow as tf
 
 from network.loss.loss_functions import weighted_cross_entropy, f1_score_loss
-from util.config import Config
+from util.config.network_config import NetworkConfig
 from util.types import LossType
 
 
@@ -11,7 +11,7 @@ FOCAL_LOSS_ALPHA = 0.25
 FOCAL_LOSS_GAMMA = 2.0
 WCE_BETA = 10
 
-def determine_loss_function(config: Config) -> Callable[[tf.Tensor, tf.Tensor], tf.Tensor]:
+def determine_loss_function(config: NetworkConfig) -> Callable[[tf.Tensor, tf.Tensor], tf.Tensor]:
     """Determine the loss function using the config and function specific values around it."""
     match config.loss:
         case LossType.FocalLoss:

@@ -2,7 +2,7 @@ from typing import Any
 
 from operations.operation import Operation
 import operations.arguments as arguments
-from util.config import load_config
+from util.config import load_network_config
 from tensorflow.keras.utils import plot_model
 from network.loss import determine_loss_function
 from network.metrics import get_standard_metrics
@@ -14,7 +14,7 @@ class Visualize(Operation):
     """Visualize the model architecture."""
 
     def __call__(self, dataset: str, network: str) -> None:
-        config = load_config(network, dataset)
+        config = load_network_config(network, dataset)
 
         # %%
         # Prepare model for training

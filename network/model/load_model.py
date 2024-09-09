@@ -4,11 +4,11 @@ import sys
 from tensorflow.keras.models import model_from_json
 from tensorflow.keras import Model
 
-from util.config import Config
+from util.config.network_config import NetworkConfig
 from util.types import ModelType
 
 
-def load_model(config: Config) -> Model:
+def load_model(config: NetworkConfig) -> Model:
     """
     Load the model indicated in the config file.
     If none are indicated, take the best performing model for the current dataset-network combination.

@@ -6,7 +6,7 @@ from typing import Union
 import yaml
 from yaml import SafeLoader
 
-from util.dataset_config import DatasetConfig, load_data_config
+from util.config.dataset_config import DatasetConfig, load_data_config
 from util.types import OptimizerType, ModelType, BackboneType, LossType
 
 # Path constants, change at your own leisure
@@ -23,7 +23,7 @@ NETWORK_FIGURE_FILE: str = 'network.png'
 TXT_SUMMARY_FILE: str = 'summary.txt'
 
 @dataclass(slots=True)
-class Config:
+class NetworkConfig:
     """Config dataclass, holding most hyperparameters as indicated by the user as well as some defaults."""
     id: str
 
@@ -71,7 +71,7 @@ class Config:
     START_EPOCH: int = 0
     MONITOR_METRIC: str = 'f1_score_dilated'
 
-def load_config(config_filename: str, dataset_config_filename) -> Config:
+def load_network_config(config_filename: str, dataset_config_filename) -> NetworkConfig:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
 
     dataset_config = load_data_config(dataset_config_filename)
@@ -80,7 +80,7 @@ def load_config(config_filename: str, dataset_config_filename) -> Config:
         config_vals = yaml.load(config_file, Loader=SafeLoader)
 
     # Try loading the config
-    config = Config(
+    config = NetworkConfig(
         id=str(config_vals['id']),
         model=ModelType(config_vals['model']),
         backbone=BackboneType(config_vals['backbone']) if config_vals.get('backbone') else None,

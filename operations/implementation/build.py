@@ -8,7 +8,7 @@ from operations.operation import Operation
 import operations.arguments as arguments
 from typing import Any
 from subroutines.HDF5 import HDF5DatasetWriterMask
-from util.dataset_config import load_data_config
+from util.config import load_data_config
 
 
 class Build(Operation):

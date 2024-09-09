@@ -5,7 +5,7 @@ import tempfile
 import tensorflow as tf
 import segmentation_models as sm
 
-from util.config import Config
+from util.config.network_config import NetworkConfig
 from util.types import ModelType
 
 OUTPUT_NUM_CLASSES = 1
@@ -50,7 +50,7 @@ def add_regularization(model: tf.keras.Model, regularization: float) -> tf.keras
     new_model.load_weights(tmp_weights_path, by_name=True)
     return model
 
-def build_model(config: Config) -> tf.keras.Model:
+def build_model(config: NetworkConfig) -> tf.keras.Model:
     """
     Build the model itself. Note that this does not mean **compiling** the model, this still needs to be done afterwards.
     We just go past each case individually to ensure we set proper parameters.
