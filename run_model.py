@@ -5,12 +5,8 @@ os.environ['SM_FRAMEWORK'] = 'tf.keras'
 
 import argparse
 
-from build import process_dataset
-from test import generate_predictions
-from train import train_model
-from visualize import visualize_architecture
-from util.config import load_config
-from util.types import RunMode
+from operations import get_operation
+from util.types import OperationType
 
 
 def run_model():
@@ -19,22 +15,23 @@ def run_model():
     parser = argparse.ArgumentParser(
         prog='CNN-masonry-crack-tasks',
         description='Train or evaluate crack segmentation models',
+        add_help=False
     )
-    parser.add_argument('--config', '-c', help='Config file', type=str, required=True)
-    parser.add_argument('--mode', '-m', help='Train, test, build or visualize', type=RunMode, required=True)
-    parser.add_argument('--dataset', '-d', help='Dataset config file', type=str, required=True)
-    args = parser.parse_args()
-    config = load_config(args.config, args.dataset)
+    parser.add_argument('--operation', '-o', help='The operation to perform (see operations/implementations)', type=OperationType, required=True)
+    args, unknown = parser.parse_known_args()
 
-    # Run actual program depending on mode
-    if args.mode == RunMode.BUILD:
-        process_dataset(config.dataset_config)
-    if args.mode == RunMode.TRAIN:
-        train_model(config)
-    if args.mode == RunMode.TEST:
-        generate_predictions(config)
-    if args.mode == RunMode.VISUALIZE:
-        visualize_architecture(config)
+    operation = get_operation(args.operation)
+    for arg_specification in operation.get_cli_arguments():
+        name = arg_specification['name']
+        del(arg_specification['name'])
+        parser.add_argument(*name, **arg_specification)
+
+    # Add help back now that we have all args and parse again
+    parser.add_argument('--help', '-h', action='help', default=argparse.SUPPRESS, help='Show this help message and exit')
+    args = parser.parse_args()
+    kwargs = vars(args)
+    del(kwargs['operation'])    # Remove since this is not operation input.
+    operation(**kwargs)
 
 if __name__ == '__main__':
     run_model()

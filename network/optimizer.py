@@ -4,11 +4,11 @@ from tensorflow.keras.optimizers.legacy import Adam as LegacyAdam
 from tensorflow.keras.optimizers import Adam, SGD, RMSprop
 from keras.src.optimizers import optimizer
 
-from util.config import Config
+from util.config.network_config import NetworkConfig
 from util.types import OptimizerType
 
 
-def determine_optimizer(config: Config) -> optimizer.Optimizer:
+def determine_optimizer(config: NetworkConfig) -> optimizer.Optimizer:
     """Determine the optimizer from the config. For Adam it is recommended to run the legacy version on Apple silicon."""
     match config.optimizer:
         case OptimizerType.Adam:

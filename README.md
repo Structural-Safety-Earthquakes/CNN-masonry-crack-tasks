@@ -32,21 +32,23 @@ git submodule init --recursive
 The basic entrypoint of the program is `run_model.py`:
 
 ```bash
-python3 run_model.py --config CONFIG --dataset DATASET --mode MODE
+python3 run_model.py --operation OPERATION
 ```
 
-where `CONFIG` and `DATASET` should point to config YAML files (see [`example_config.yaml`](example_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)) and `MODE` should indicate the type of run mode. The run mode consist of:
+where `OPERATION` should indicate the type of operation to perform. The operation types consist of:
 
 * `build`: Build and process the dataset into a training and validation set.
 * `train`: Train a network.
 * `test`: Generate predictions.
 * `visualize`: Visualize the model architecture in a file.
 
-### Configuration file
+All operations are listed in their respective [directory](operations/implementation).
 
-Examples: [`example_config.yaml`](example_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)  
+### Configuration files
 
-Note that many of the configurations options are either strings, numbers or booleans. These speak for themselves. For some settings, only a set of values are possible. These values are listed in [`types.py`](util/types.py). An overview of all settings and their types is provided in [`config.py`](util/config.py).
+Examples: [`example_network_config.yaml`](example_network_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)  
+
+Note that many of the configurations options are either strings, numbers or booleans. These speak for themselves. For some settings, only a set of values are possible. These values are listed in [`types.py`](util/types.py). An overview of all settings and their types is provided in the [`configs`](util/config/).
 
 # Acknowledgements - original work
 
@@ -75,6 +77,7 @@ In case you use or find interesting their work please cite the following journal
 ```
 
 # References
+
 The following codes are based on material provided by **[Adrian Rosebrock](linkedin.com/in/adrian-rosebrock-59b8732a)** shared on his blog (**https://www.pyimagesearch.com/**) and his books:
 
 * `hdf5datasetgenerator_mask.py`  
@@ -88,13 +91,5 @@ The following codes are based on material provided by **[Adrian Rosebrock](linke
 
 The Segmentation Models with pre-trained CNNs are implemented based on the work of **[Pavel Yakubovskiy](https://github.com/qubvel)** and his GitHub Repository https://github.com/qubvel/segmentation_models  
 
-**Deeplabv3** is implemented as provided by the corresponding [GitHub Repository](https://github.com/tensorflow/models/tree/master/research/deeplab)  
-
-Unet is based on the implementation found in the link below:  
-https://www.depends-on-the-definition.com/unet-keras-segmenting-images/  
-
 The Weighted Cross-Entropy (WCE) Loss is based on the implementation found in the link below:  
-https://jeune-research.tistory.com/entry/Loss-Functions-for-Image-Segmentation-Distribution-Based-Losses  
-
-The Focal Loss is based on the implementation found in the link below:  
-https://github.com/umbertogriffo/focal-loss-keras
+https://jeune-research.tistory.com/entry/Loss-Functions-for-Image-Segmentation-Distribution-Based-Losses
