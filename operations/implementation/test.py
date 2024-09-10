@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Union
 
 from operations.operation import Operation
 import operations.arguments as arguments
@@ -12,14 +12,11 @@ from util.config import load_network_config, load_data_config, load_output_confi
 class Test(Operation):
     """Operation which tests a trained network"""
 
-    def __call__(self, dataset: str, network: str, weights: str, dilate: str) -> None:
+    def __call__(self, dataset: str, network: str, weights: Union[str, None], dilate: bool) -> None:
         """Generate the predictions given a specific configuration."""
         network_config = load_network_config(network)
         dataset_config = load_data_config(dataset)
         output_config = load_output_config(network_id=network_config.id, dataset_id=dataset_config.dataset_dir)
-
-        dilate_lower  = dilate.lower()
-        dilate = dilate_lower != '0' and dilate_lower != 'false'
 
         # TODO: remove args by refactoring dependencies
         args = {

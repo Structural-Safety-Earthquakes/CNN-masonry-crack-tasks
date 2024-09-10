@@ -30,14 +30,6 @@ class NetworkConfig:
     augment_data: bool
     binarize_labels: bool
 
-    # Output/logging info
-    save_model: bool    # Whether to save the entire model (or if False, the weights)
-    epochs_per_checkpoint: int
-
-    # Run-time constants, change at your own leisure
-    START_EPOCH: int = 0
-    MONITOR_METRIC: str = 'f1_score_dilated'
-
 def load_network_config(config_filename: str) -> NetworkConfig:
     """Load a config YAML file. Doesn't catch input errors that might be throw due to errors."""
     with open(config_filename, 'r') as config_file:
@@ -59,8 +51,6 @@ def load_network_config(config_filename: str) -> NetworkConfig:
         optimizer=OptimizerType(config_vals['optimizer']),
         augment_data=bool(config_vals['augment_data']),
         binarize_labels=bool(config_vals['binarize_labels']),
-        save_model=bool(config_vals['save_model']),
-        epochs_per_checkpoint=int(config_vals['epochs_per_checkpoint']),
     )
 
     return config

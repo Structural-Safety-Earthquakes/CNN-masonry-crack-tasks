@@ -5,10 +5,10 @@ from enum import Enum
 
 class OperationType(Enum):
     """Mode of the program. Training trains a network, testing tests prediction performance, build builds the dataset, visualize visualizes the architecture."""
-    TRAIN = 'train'
-    TEST = 'test'
-    BUILD = 'build'
-    VISUALIZE = 'visualize'
+    Train = 'train'
+    Test = 'test'
+    Build = 'build'
+    Visualize = 'visualize'
 
 class LossType(Enum):
     """Type of loss to use during training."""
@@ -17,6 +17,15 @@ class LossType(Enum):
     BCE = 'bce'
     F1Score = 'f1_score'
     F1ScoreDilate = 'f1_score_dilated'
+
+class MetricType(Enum):
+    """Type of metrics to monitor during training."""
+    Accuracy = 'accuracy'
+    Recall = 'recall'
+    Precision = 'precision'
+    PrecisionDilated = 'precision_dilated'
+    F1Score = 'f1_score'
+    F1ScoreDilated = 'f1_score_dilated'
 
 class OptimizerType(Enum):
     """Types of optimization algorithms."""

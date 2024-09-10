@@ -9,13 +9,13 @@ from util.types import OperationType
 def get_operation(operation_type: OperationType) -> Operation:
     """Get the operation associated with the type."""
     match operation_type:
-        case OperationType.BUILD:
+        case OperationType.Build:
             return Build()
-        case OperationType.TRAIN:
+        case OperationType.Train:
             return Train()
-        case OperationType.TEST:
+        case OperationType.Test:
             return Test()
-        case OperationType.VISUALIZE:
+        case OperationType.Visualize:
             return Visualize()
         case _:
             raise ValueError(f'Unknown operation: {operation_type}')
