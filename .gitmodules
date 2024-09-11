@@ -1,0 +1,3 @@
+[submodule "libs/deepcrack"]
+	path = libs/deepcrack
+	url = git@github.com:DavidHidde/DeepCrack-Tensorflow.git

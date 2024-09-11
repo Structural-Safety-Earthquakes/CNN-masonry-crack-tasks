@@ -1,0 +1,21 @@
+{
+  id: example,
+
+  # Model info
+  model: Unet,
+  backbone: mobilenet,
+  use_pretrained: true,
+
+  # Learning process info
+  batch_size: 4,
+  batch_normalization: true,
+  num_epochs: 10,
+  loss: wce,
+  initial_learning_rate: 0.0005,
+  regularization: 0.001,
+  dropout:,
+  optimizer: Adam,
+
+  binarize_labels: true,
+  augment_data: false,
+}

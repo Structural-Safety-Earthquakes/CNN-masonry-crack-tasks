@@ -1,0 +1,5 @@
+{
+  dataset_dir: example_dataset,
+  image_dims: [224, 224, 3],
+  validation_split_percent: 0.4
+}
