@@ -1,3 +1,3 @@
 # __init__.py
-from network.callbacks.epochcheckpoint import EpochCheckpoint
-from network.callbacks.trainingmonitor import TrainingMonitor
+from network.callbacks.epoch_checkpoint import EpochCheckpoint
+from network.callbacks.training_monitor import TrainingMonitor
