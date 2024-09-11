@@ -1,4 +1,4 @@
-# Crack detection and segmentation for masonry surfaces
+# Crack segmentation for masonry surfaces
 
 This is a fork of the [crack_detection_CNN_masonry repoistory](https://github.com/dimitrisdais/crack_detection_CNN_masonry), which aims to share the code of their research about crack detection/segmentation on masonry surfaces. This fork improves upon the original code through the following:
 
@@ -7,6 +7,7 @@ This is a fork of the [crack_detection_CNN_masonry repoistory](https://github.co
 * Remove weird and unnecessary conventions like folder naming.
 * Add better generalizability through the use of configuration files and enhanced dataset support. Add support for more segmentation models.
 * Dependency cleanup: clearly indicate all dependencies through a `requirements.txt` file and make the framework compatible with modern Tensorflow.
+* Add QOL features such as test set creation and resuming training.
 
 For changes compared to the original repo, please have a look at the [PR descriptions](https://github.com/DavidHidde/CNN-masonry-crack-tasks/pulls?q=is%3Apr+is%3Aclosed+). The main changes include:
 
@@ -17,7 +18,9 @@ For changes compared to the original repo, please have a look at the [PR descrip
 
 Overall, the core functionality is retained but updated to work with modern setups, be more flexible as well as maintainable. Some results might differ from the original paper, but it is clear that the forked repo does not fully represent the original paper due to its broken state and lack of crack classification support.
 
-## Installation
+![cover_image](images/crack_detection.png)
+
+# Installation
 
 The project makes use of multiple dependencies. To install these, simply run `pip3 install -r requirements.txt`.  
 
@@ -27,7 +30,7 @@ Like the original repo, some files must currently be copied over from other repo
 git submodule init --recursive
 ```
 
-## Usage
+# Usage
 
 The basic entrypoint of the program is `run_model.py`:
 
@@ -44,11 +47,52 @@ where `OPERATION` should indicate the type of operation to perform. The operatio
 
 All operations are listed in their respective [directory](operations/implementation).
 
-### Configuration files
+## Configuration files
 
 Examples: [`example_network_config.yaml`](example_network_config.yaml) and [`example_dataset_config.yaml`](example_dataset_config.yaml)  
 
 Note that many of the configurations options are either strings, numbers or booleans. These speak for themselves. For some settings, only a set of values are possible. These values are listed in [`types.py`](util/types.py). An overview of all settings and their types is provided in the [`configs`](util/config/).
+
+## Basic use case example
+
+A basic example for how this repository functions is described here. 
+
+### Building the dataset
+
+Given the task to train a segmentation network on a dataset, you should first start by building the dataset.
+This is done by first copying the dataset files to a new folder inside the [dataset](dataset) directory and then copying [`example_dataset_config.yaml`](example_dataset_config.yaml) and inserting the correct dataset values.
+Once you have split the images and labels into separate folders and created the dataset config, you can simply call:
+
+```bash
+python3 run_model.py -o build -d your_dataset_config.yaml 
+```
+
+This should build the `train.hdf5` and `val.hdf5` inside the dataset directory for you.
+
+### Training a model
+
+The next step is to train a model. The first step is to copy [`example_network_config.yaml`](example_network_config.yaml) and determine the network you want to train.
+After you have decided this, only 1 simple call is needed:
+
+```bash
+python3 run_model.py -o train -d your_dataset_config.yaml -n your_network_config.yaml
+```
+
+This should train the model for you. In case something happens and the training interrupts, you can choose to resume the model using:
+
+```bash
+python3 run_model.py -o train -d your_dataset_config.yaml -n your_network_config.yaml --weights name_of_the_newest_checkpoint.keras
+```
+
+### Testing the trained model
+
+Finally, to test the model one can simply run:
+
+```bash
+python3 run_model.py -o test -d your_dataset_config.yaml -n your_network_config.yaml
+```
+
+This should provide you with some prediction files which visualize the difference between the ground truth and predicted label.
 
 # Acknowledgements - original work
 
@@ -80,10 +124,10 @@ In case you use or find interesting their work please cite the following journal
 
 The following codes are based on material provided by **[Adrian Rosebrock](linkedin.com/in/adrian-rosebrock-59b8732a)** shared on his blog (**https://www.pyimagesearch.com/**) and his books:
 
-* `hdf5datasetgenerator_mask.py`  
-* `hdf5datasetwriter_mask.py`
-* `epochcheckpoint.py`
-* `trainingmonitor.py`
+* `hdf5_dataset_generator.py`  
+* `hdf5_dataset_writer.py`
+* `epoch_checkpoint.py`
+* `training_monitor.py`
 
 - Adrian Rosebrock, Deep Learning for Computer Vision with Python - Practitioner Bundle, PyImageSearch, https://www.pyimagesearch.com/deep-learning-computer-vision-python-book/, accessed on 24 February 2021  
 - Adrian Rosebrock, Keras: Starting, stopping, and resuming training, PyImageSearch, https://www.pyimagesearch.com/2019/09/23/keras-starting-stopping-and-resuming-training/, accessed on 24 February 2021  

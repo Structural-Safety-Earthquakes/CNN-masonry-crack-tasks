@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from operations.operation import Operation
 import operations.arguments as arguments
 from typing import Any
-from subroutines.HDF5 import HDF5DatasetWriterMask
+from util.hdf5 import HDF5DatasetWriter
 from util.config import load_data_config, load_output_config
 
 
@@ -49,7 +49,7 @@ class Build(Operation):
             print("[INFO] building {}...".format(output_file))
 
             # Create HDF5 writer
-            writer = HDF5DatasetWriterMask((len(data_pairs), *dataset_config.image_dims), output_file)
+            writer = HDF5DatasetWriter((len(data_pairs), *dataset_config.image_dims), output_file)
 
             # initialize the progress bar
             widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
