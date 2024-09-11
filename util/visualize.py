@@ -12,7 +12,14 @@ from util.hdf5 import IMAGES_KEY, LABELS_KEY
 BINARIZATION_THRESHOLD = 0.5
 LABEL_COLOR = 0.5
 
-def visualize_prediction_comparisons(predictions: tf.Tensor, output_config: OutputConfig, dilate_labels: bool):
+def save_predictions(predictions: tf.Tensor, output_config: OutputConfig) -> None:
+    """Save the predictions plainly as just images."""
+    for idx, prediction in enumerate(predictions):
+        prediction = tf.cast((prediction > BINARIZATION_THRESHOLD) * 255 * LABEL_COLOR, tf.uint8)
+        img = tf.keras.preprocessing.image.array_to_img(prediction, scale=False)
+        img.save(os.path.join(output_config.predictions_dir, f'{idx}.png'))
+
+def visualize_prediction_comparisons(predictions: tf.Tensor, output_config: OutputConfig, dilate_labels: bool) -> None:
     """Visualize the predictions into a comparison between the image, the ground truth and the predicted label."""
 
     data_file = h5py.File(output_config.validation_set_file, 'r')
