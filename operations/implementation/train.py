@@ -7,7 +7,7 @@ from network.model import build_model, load_model
 from network.optimizer import determine_optimizer
 from operations.operation import Operation
 import operations.arguments as arguments
-from subroutines.callbacks import EpochCheckpoint, TrainingMonitor
+from network.callbacks import EpochCheckpoint, TrainingMonitor
 from subroutines.HDF5 import HDF5DatasetGeneratorMask
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
@@ -32,18 +32,17 @@ class Train(Operation):
         dataset_config = load_data_config(dataset)
         output_config = load_output_config(network_id=network_config.id, dataset_id=dataset_config.dataset_dir)
 
-
         # %%
         # Prepare model for training. Load one if we have it and otherwise start again
         #
         if weights is not None:
             model = load_model(network_config, output_config, dataset_config.image_dims, weights)
 
-            # Determine start epoch. We assume the file follows the regular naming scheme (*_epoch_X_*.)
+            # Determine start epoch. We assume the file follows the regular naming scheme (epoch_X_*.)
             parts = weights.split('_')
             for idx, part in enumerate(parts):
                 if part == 'epoch':
-                    start_epoch = int(parts[idx + 1][:parts[idx + 1].find('.')])
+                    start_epoch = int(parts[idx + 1])
                     break
             else:
                 raise ValueError('Could not determine start epoch from weights file.')
@@ -87,11 +86,6 @@ class Train(Operation):
             binarize=network_config.binarize_labels
         )
 
-        # %%
-        # Callback that streams epoch results to a CSV file
-        # https://keras.io/api/callbacks/csv_logger/
-        csv_logger = CSVLogger(output_config.log_file, append=True, separator=';')
-
         # Serialize model to JSON
         try:
             model_json = model.to_json()
@@ -100,29 +94,22 @@ class Train(Operation):
         except:
             print('Warning: Unable to write model.json!!')
 
-        # Define whether the whole model or the weights only will be saved from the ModelCheckpoint
-        # Refer to the documentation of ModelCheckpoint for extra details
-        # https://keras.io/api/callbacks/model_checkpoint/
-        template_name = f'epoch_{{epoch}}_{monitor_metric.value}_{{val_{monitor_metric.value}:.3f}}.h5'
-        checkpoint_file = os.path.join(output_config.checkpoints_dir, template_name) if save_model else os.path.join(output_config.weights_dir, template_name)
-
+        # Setup all callbacks
+        csv_logger = CSVLogger(output_config.log_file, append=True, separator=';')
         epoch_checkpoint = EpochCheckpoint(
             output_config.checkpoints_dir,
-            output_config.weights_dir,
-            'model' if save_model else 'weights',
-            every=checkpoint_epochs,
-            startAt=start_epoch,
-            info=network_config.id,
-            counter='0'
+            not save_model,
+            checkpoint_epochs,
+            start_epoch
         )
         training_monitor = TrainingMonitor(
             output_config.progression_file,
-            jsonPath=output_config.metrics_file,
-            startAt=start_epoch,
-            metric=monitor_metric.value
+            output_config.metrics_file,
+            start_epoch,
+            monitor_metric
         )
         model_checkpoint = ModelCheckpoint(
-            checkpoint_file,
+            os.path.join(output_config.best_models_dir, f'epoch_{{epoch}}_{monitor_metric.value}_{{val_{monitor_metric.value}:.3f}}.keras'),
             monitor=f'val_{monitor_metric.value}',
             verbose=1,
             save_best_only=True,

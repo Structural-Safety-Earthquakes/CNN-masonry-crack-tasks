@@ -15,7 +15,7 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
     """
     # Resolve missing target by taking best performing model from the weights and model folder.
     if weights_file is None:
-        candidates = [weight for weight in os.listdir(output_config.weights_dir) if weight.endswith('.h5')]
+        candidates = [weight for model_dir in [output_config.best_models_dir, output_config.checkpoints_dir] for weight in os.listdir(model_dir) if weight.endswith('.h5') or weight.endswith('.keras')]
         best_value = '0000000000000'
         for candidate in candidates:
             if candidate[-6:-3] > best_value[-6:-3]:
@@ -28,7 +28,10 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
 
     # If the weights file is not a path, prefix the weights directory to it.
     if not os.sep in weights_file:
-        weights_file = os.path.join(output_config.weights_dir, weights_file)
+        if os.path.exists(os.path.join(output_config.best_models_dir, weights_file)):
+            weights_file = os.path.join(output_config.best_models_dir, weights_file)
+        elif os.path.exists(os.path.join(output_config.checkpoints_dir, weights_file)):
+            weights_file = os.path.join(output_config.checkpoints_dir, weights_file)
 
     if not os.path.exists(weights_file) or output_config.network_dir not in weights_file:
         raise ValueError('Please provide a valid model file for the current network or train a model using the current dataset-network combination.')

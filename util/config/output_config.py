@@ -15,8 +15,7 @@ VALIDATION_DATASET_FILE: str = 'validation.hdf5'
 OUTPUT_ROOT_DIR: str = 'output'
 OUTPUT_CHECKPOINTS_DIR: str = 'checkpoints'
 OUTPUT_PREDICTIONS_DIR: str = 'predictions'
-OUTPUT_WEIGHTS_DIR: str = 'weights'
-OUTPUT_MODELS_DIR: str = 'models'
+OUTPUT_BEST_MODELS_DIR: str = 'best_models'
 
 LOG_FILE: str = 'log.csv'
 MODEL_FILE: str = 'model.json'
@@ -29,29 +28,28 @@ TXT_SUMMARY_FILE: str = 'summary.txt'
 class OutputConfig:
     """Config specifying all output directories/files."""
     # Network specific (using network_id)
-    network_dir: Union[str, None]
+    network_dir: Union[str, None] = None
 
     # Dataset specific (using dataset_id)
-    images_dir: Union[str, None]
-    labels_dir: Union[str, None]
-    train_set_file: Union[str, None]
-    validation_set_file: Union[str, None]
+    images_dir: Union[str, None] = None
+    labels_dir: Union[str, None] = None
+    train_set_file: Union[str, None] = None
+    validation_set_file: Union[str, None] = None
 
     # Dataset & Network specific (using dataset_id and network_id)
-    checkpoints_dir: Union[str, None]
-    predictions_dir: Union[str, None]
-    weights_dir: Union[str, None]
-    models_dir: Union[str, None]
-    log_file: Union[str, None]
-    model_file: Union[str, None]
-    metrics_file: Union[str, None]
-    progression_file: Union[str, None]
-    figure_file: Union[str, None]
-    txt_summary_file: Union[str, None]
+    checkpoints_dir: Union[str, None] = None
+    predictions_dir: Union[str, None] = None
+    best_models_dir: Union[str, None] = None
+    log_file: Union[str, None] = None
+    model_file: Union[str, None] = None
+    metrics_file: Union[str, None] = None
+    progression_file: Union[str, None] = None
+    figure_file: Union[str, None] = None
+    txt_summary_file: Union[str, None] = None
 
 def load_output_config(network_id: Union[str, None] = None, dataset_id: Union[str, None] = None) -> OutputConfig:
     """Load an output config using either the network_id, dataset_id or both."""
-    output_config = OutputConfig(*([None] * 15))
+    output_config = OutputConfig()
     if network_id is not None:
         output_config.network_dir = os.path.join(OUTPUT_ROOT_DIR, network_id)
 
@@ -77,11 +75,9 @@ def load_output_config(network_id: Union[str, None] = None, dataset_id: Union[st
 
         output_config.checkpoints_dir = os.path.join(output_dir, OUTPUT_CHECKPOINTS_DIR)
         output_config.predictions_dir = os.path.join(output_dir, OUTPUT_PREDICTIONS_DIR)
-        output_config.weights_dir = os.path.join(output_dir, OUTPUT_WEIGHTS_DIR)
-        output_config.models_dir = os.path.join(output_dir, OUTPUT_MODELS_DIR)
+        output_config.best_models_dir = os.path.join(output_dir, OUTPUT_BEST_MODELS_DIR)
         Path(output_config.checkpoints_dir).mkdir(exist_ok=True)
         Path(output_config.predictions_dir).mkdir(exist_ok=True)
-        Path(output_config.weights_dir).mkdir(exist_ok=True)
-        Path(output_config.models_dir).mkdir(exist_ok=True)
+        Path(output_config.best_models_dir).mkdir(exist_ok=True)
 
     return output_config
