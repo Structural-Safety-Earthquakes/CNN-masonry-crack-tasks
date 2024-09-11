@@ -5,7 +5,7 @@ from operations.operation import Operation
 import operations.arguments as arguments
 from network.model import load_model
 from util.hdf5 import HDF5DatasetGenerator
-from subroutines.visualize_predictions import Visualize_Predictions
+from util.visualize import visualize_prediction_comparisons
 from util.config import load_network_config, load_data_config, load_output_config
 
 
@@ -18,13 +18,6 @@ class Test(Operation):
         dataset_config = load_data_config(dataset)
         output_config = load_output_config(network_id=network_config.id, dataset_id=dataset_config.dataset_dir)
 
-        # TODO: remove args by refactoring dependencies
-        args = {
-            'main': os.getcwd(),
-            'EVAL_HDF5': output_config.validation_set_file,
-            'predictions_subfolder': output_config.predictions_dir + os.sep,
-            'predictions_dilate': dilate
-        }
         model = load_model(network_config, output_config, dataset_config.image_dims, weights)
 
         # Do not use data augmentation when evaluating model: aug=None
@@ -44,11 +37,8 @@ class Test(Operation):
             verbose=1
         )
 
-        # Visualize  predictions
-        # Create a plot with original image, ground truth and prediction
-        # Show the metrics for the prediction
-        # Output will be stored in the predictions folder
-        Visualize_Predictions(args, predictions)
+        # Plot the output
+        visualize_prediction_comparisons(predictions, output_config, dilate)
 
     def get_cli_arguments(self) -> list[dict[str, Any]]:
         return [
