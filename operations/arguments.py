@@ -51,3 +51,10 @@ MONITOR_METRIC_ARGUMENT = {
     'default': MetricType.F1ScoreDilated,
     'required': False,
 }
+NO_LABELS_ARGUMENT = {
+    'name': ['--no_labels'],
+    'help': 'Whether this dataset has labels. When this flag is provided, the dataset will be supplemented using empty labels.',
+    'default': False,
+    'required': False,
+    'action': 'store_true'
+}

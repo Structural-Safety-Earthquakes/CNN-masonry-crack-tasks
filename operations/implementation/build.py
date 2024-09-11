@@ -14,20 +14,20 @@ from util.config import load_data_config, load_output_config
 class Build(Operation):
     """Build the config."""
 
-    def __call__(self, dataset: str) -> None:
+    def __call__(self, dataset: str, no_labels: bool) -> None:
         """Process the dataset into a training and validation set."""
         dataset_config = load_data_config(dataset)
         output_config = load_output_config(dataset_id=dataset_config.dataset_dir)
 
         # Grab the paths to the images and masks and sort them to ensure everything is properly in order.
         img_paths = list(paths.list_images(output_config.images_dir))
-        label_paths = list(paths.list_images(output_config.labels_dir))
+        label_paths = list(paths.list_images(output_config.labels_dir)) if no_labels is False else img_paths
         img_paths.sort()
         label_paths.sort()
 
         if dataset_config.validation_split_percent == 0.:  # Only training data
             datasets = [(list(zip(img_paths, label_paths)), output_config.train_set_file)]
-        elif dataset_config.validation_split_percent == 1.:  # Only validation data
+        elif dataset_config.validation_split_percent == 1. or no_labels:  # Only validation data
             datasets = [(list(zip(img_paths, label_paths)), output_config.validation_set_file)]
         else:  # Perform stratified sampling from the training set to build the testing split from the training data
             train_img_split, val_img_split, train_label_split, val_label_split = train_test_split(
@@ -59,7 +59,11 @@ class Build(Operation):
             for (idx, (im_path, label_path)) in enumerate(data_pairs):
                 # Load the image and label and resize them if necessary
                 image = cv2.imread(im_path)
-                label = cv2.imread(label_path, 0)
+
+                if no_labels:
+                    label = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+                else:
+                    label = cv2.imread(label_path, 0)
 
                 if dataset_config.image_dims != image.shape:
                     image = resize(image, dataset_config.image_dims, mode='constant', preserve_range=True)
@@ -80,7 +84,7 @@ class Build(Operation):
             writer.close()
 
     def get_cli_arguments(self) -> list[dict[str, Any]]:
-        """We only need a dataset config."""
         return [
-            arguments.DATASET_ARGUMENT
+            arguments.DATASET_ARGUMENT,
+            arguments.NO_LABELS_ARGUMENT,
         ]
