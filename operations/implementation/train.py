@@ -8,7 +8,7 @@ from network.optimizer import determine_optimizer
 from operations.operation import Operation
 import operations.arguments as arguments
 from network.callbacks import EpochCheckpoint, TrainingMonitor
-from subroutines.HDF5 import HDF5DatasetGeneratorMask
+from util.hdf5 import HDF5DatasetGenerator
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from util.config import load_network_config, load_data_config, load_output_config
@@ -58,7 +58,7 @@ class Train(Operation):
 
         # Data augmentation for training and validation sets
         if network_config.augment_data:
-            aug = ImageDataGenerator(
+            data_augmentor = ImageDataGenerator(
                 rotation_range=20,
                 zoom_range=0.15,
                 width_shift_range=0.2,
@@ -68,22 +68,22 @@ class Train(Operation):
                 fill_mode='nearest'
             )
         else:
-            aug = None
+            data_augmentor = None
 
         # Load data generators
-        train_gen = HDF5DatasetGeneratorMask(
+        train_gen = HDF5DatasetGenerator(
             output_config.train_set_file,
             network_config.batch_size,
-            aug=aug,
-            shuffle=False,
-            binarize=network_config.binarize_labels
+            False,
+            network_config.binarize_labels,
+            data_augmentor
         )
-        val_gen = HDF5DatasetGeneratorMask(
+        val_gen = HDF5DatasetGenerator(
             output_config.validation_set_file,
             network_config.batch_size,
-            aug=aug,
-            shuffle=False,
-            binarize=network_config.binarize_labels
+            False,
+            network_config.binarize_labels,
+            data_augmentor
         )
 
         # Serialize model to JSON
@@ -121,10 +121,10 @@ class Train(Operation):
         # Train the network
         #
         H = model.fit(
-            train_gen.generator(),
-            steps_per_epoch=train_gen.numImages // network_config.batch_size,
-            validation_data=val_gen.generator(),
-            validation_steps=val_gen.numImages // network_config.batch_size,
+            train_gen(),
+            steps_per_epoch=train_gen.num_images // network_config.batch_size,
+            validation_data=val_gen(),
+            validation_steps=val_gen.num_images // network_config.batch_size,
             initial_epoch=start_epoch,
             epochs=network_config.num_epochs,
             max_queue_size=network_config.batch_size * 2,

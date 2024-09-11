@@ -4,7 +4,7 @@ from typing import Any, Union
 from operations.operation import Operation
 import operations.arguments as arguments
 from network.model import load_model
-from subroutines.HDF5 import HDF5DatasetGeneratorMask
+from util.hdf5 import HDF5DatasetGenerator
 from subroutines.visualize_predictions import Visualize_Predictions
 from util.config import load_network_config, load_data_config, load_output_config
 
@@ -28,18 +28,18 @@ class Test(Operation):
         model = load_model(network_config, output_config, dataset_config.image_dims, weights)
 
         # Do not use data augmentation when evaluating model: aug=None
-        eval_gen = HDF5DatasetGeneratorMask(
+        eval_gen = HDF5DatasetGenerator(
             output_config.validation_set_file,
             network_config.batch_size,
-            aug=None,
-            shuffle=False,
-            binarize=network_config.binarize_labels
+            False,
+            network_config.binarize_labels,
+            None
         )
 
         # Use the pretrained model to generate predictions for the input samples from a data generator
         predictions = model.predict(
-            eval_gen.generator(),
-            steps=eval_gen.numImages // network_config.batch_size + 1,
+            eval_gen(),
+            steps=eval_gen.num_images // network_config.batch_size + 1,
             max_queue_size=network_config.batch_size * 2,
             verbose=1
         )

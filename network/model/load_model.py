@@ -15,10 +15,11 @@ def load_model(network_config: NetworkConfig, output_config: OutputConfig, input
     """
     # Resolve missing target by taking best performing model from the weights and model folder.
     if weights_file is None:
-        candidates = [weight for model_dir in [output_config.best_models_dir, output_config.checkpoints_dir] for weight in os.listdir(model_dir) if weight.endswith('.h5') or weight.endswith('.keras')]
+        candidates = [weight for weight in os.listdir(output_config.best_models_dir) if weight.endswith('.keras')]
         best_value = '0000000000000'
         for candidate in candidates:
-            if candidate[-6:-3] > best_value[-6:-3]:
+            # Assume the score is listed at the end (*_score.keras)
+            if float(candidate[-9:-6]) > float(best_value[-9:-6]):
                 best_value = candidate
 
         if best_value != '0000000000000':
