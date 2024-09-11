@@ -1,18 +1,17 @@
-import os
 from typing import Any, Union
 
 from operations.operation import Operation
 import operations.arguments as arguments
 from network.model import load_model
 from util.hdf5 import HDF5DatasetGenerator
-from util.visualize import visualize_prediction_comparisons
+from util.visualize import visualize_prediction_comparisons, save_predictions
 from util.config import load_network_config, load_data_config, load_output_config
 
 
 class Test(Operation):
     """Operation which tests a trained network"""
 
-    def __call__(self, dataset: str, network: str, weights: Union[str, None], dilate: bool) -> None:
+    def __call__(self, dataset: str, network: str, weights: Union[str, None], dilate: bool, visualize_comparisons: bool) -> None:
         """Generate the predictions given a specific configuration."""
         network_config = load_network_config(network)
         dataset_config = load_data_config(dataset)
@@ -37,8 +36,11 @@ class Test(Operation):
             verbose=1
         )
 
-        # Plot the output
-        visualize_prediction_comparisons(predictions, output_config, dilate)
+        # Plot or just save the output
+        if visualize_comparisons:
+            visualize_prediction_comparisons(predictions, output_config, dilate)
+        else:
+            save_predictions(predictions, output_config)
 
     def get_cli_arguments(self) -> list[dict[str, Any]]:
         return [
@@ -46,4 +48,5 @@ class Test(Operation):
             arguments.DATASET_ARGUMENT,
             arguments.WEIGHTS_FILE_ARGUMENT,
             arguments.DILATE_VALIDATION_LABELS_ARGUMENT,
+            arguments.VISUALIZE_COMPARISONS_ARGUMENT,
         ]

@@ -58,3 +58,10 @@ NO_LABELS_ARGUMENT = {
     'required': False,
     'action': 'store_true'
 }
+VISUALIZE_COMPARISONS_ARGUMENT = {
+    'name': ['--visualize_comparisons'],
+    'help': 'Whether to visualize the predictions as a comparison between the ground truth and the predicted label.',
+    'default': False,
+    'required': False,
+    'action': 'store_true'
+}
