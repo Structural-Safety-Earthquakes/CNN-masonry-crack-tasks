@@ -13,7 +13,8 @@ jobs:
     steps:
       - uses: tgymnich/fork-sync@v2.0
         with:
-          owner: DavidHidde
+          owner: Structural-Safety-Earthquake
+          repo: CNN-masonry-crack-tasks
           base: main
           head: main
 
