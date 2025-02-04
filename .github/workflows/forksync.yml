@@ -16,4 +16,8 @@ jobs:
           owner: DavidHidde
           base: main
           head: main
-  
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
